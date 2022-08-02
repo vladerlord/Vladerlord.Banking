@@ -1,0 +1,16 @@
+version: "3.5"
+services:
+  identityDb:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - identityDb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: 'identity'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'password'
+
+volumes:
+  identityDb:
+    driver: local
