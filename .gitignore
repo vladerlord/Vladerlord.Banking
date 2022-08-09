@@ -11,6 +11,7 @@
 
 **/appsettings.local.json
 
+docker
 deploy
 AuthGateway
 AuthGrpcService

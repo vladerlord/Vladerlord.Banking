@@ -7,15 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Grpc" />
+        <ProjectReference Include="..\Chassis\Chassis.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Chassis\Chassis.csproj" />
+        <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
+        <Folder Include="Grpc\IdentityNotifier"/>
     </ItemGroup>
 
 </Project>

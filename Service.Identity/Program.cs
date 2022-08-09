@@ -1,14 +1,15 @@
 using System.Reflection;
 using Chassis.Grpc;
 using FluentMigrator.Runner;
-using Service.Identity;
-using Service.Identity.Abstractions;
-using Service.Identity.Repository;
-using Service.Identity.Services;
+using MassTransit;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Npgsql.Logging;
 using ProtoBuf.Grpc.Server;
 using Serilog;
+using Service.Identity;
+using Service.Identity.Abstractions;
+using Service.Identity.Repository;
+using Service.Identity.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport
 
 ConfigureLogging();
 AddServices(builder.Services);
+ConfigureRabbitmq();
 
 builder.Host.UseSerilog();
 builder.WebHost.ConfigureKestrel(options =>
@@ -109,4 +111,26 @@ void ConfigurePostgres()
         NpgsqlLogManager.IsParameterLoggingEnabled = true;
 
     app.MigrateDatabase();
+}
+
+void ConfigureRabbitmq()
+{
+    var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
+    var user = Environment.GetEnvironmentVariable("RABBITMQ_USER");
+    var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+
+    if (host == null || user == null || password == null)
+        throw new Exception($"env RABBITMQ_HOST/RABBITMQ_USER/RABBITMQ_PASSWORD is not set");
+
+    builder.Services.AddMassTransit(busConfig =>
+    {
+        busConfig.UsingRabbitMq((_, config) =>
+        {
+            config.Host(host, "/", h =>
+            {
+                h.Username(user);
+                h.Password(password);
+            });
+        });
+    });
 }

@@ -1,5 +1,6 @@
 using Shared.Abstractions.Grpc.Identity.Contracts;
 using Shared.Abstractions.Grpc.Identity.Models;
+using Shared.Abstractions.MessageBus.Identity;
 
 namespace Service.Identity.Models;
 
@@ -34,6 +35,18 @@ public static class UserDatabaseSchema
         public static string Email { get; } = nameof(UserDatabaseModel.Email).ToSnakeCase();
         public static string Password { get; } = nameof(UserDatabaseModel.Password).ToSnakeCase();
         public static string Iv { get; } = nameof(UserDatabaseModel.Iv).ToSnakeCase();
+    }
+}
+
+public static class UserDatabaseModelExtensions
+{
+    public static UserCreatedEvent ToCreatedEvent(this UserDatabaseModel user)
+    {
+        return new UserCreatedEvent
+        {
+            Id = user.Id,
+            Email = user.Email
+        };
     }
 }
 

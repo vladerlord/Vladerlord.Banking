@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "dev": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RABBITMQ_HOST": "localhost",
+        "RABBITMQ_USER": "user",
+        "RABBITMQ_PASSWORD": "password"
+      }
+    }
+  }
+}

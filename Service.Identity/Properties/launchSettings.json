@@ -10,7 +10,10 @@
         "IDENTITY_DB_CONNECTION": "Host=localhost;Username=user;Password=password;Database=identity",
         "SECURITY_JWT_SECRET": "XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==",
         "SECURITY_JWT_EXPIRATION_MINUTES": "30",
-        "SECURITY_ENCRYPTION_KEY": "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM="
+        "SECURITY_ENCRYPTION_KEY": "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM=",
+        "RABBITMQ_HOST": "localhost",
+        "RABBITMQ_USER": "user",
+        "RABBITMQ_PASSWORD": "password"
       }
     }
   }

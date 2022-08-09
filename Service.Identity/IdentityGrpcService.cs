@@ -1,3 +1,4 @@
+using MassTransit;
 using Npgsql;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
@@ -11,11 +12,14 @@ public class IdentityGrpcService : IIdentityGrpcService
 {
     private readonly IUserRepository _userRepository;
     private readonly TokenAuthService _tokenAuthService;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public IdentityGrpcService(IUserRepository userRepository, TokenAuthService tokenAuthService)
+    public IdentityGrpcService(IUserRepository userRepository, TokenAuthService tokenAuthService,
+        IPublishEndpoint publishEndpoint)
     {
         _userRepository = userRepository;
         _tokenAuthService = tokenAuthService;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<LoginGrpcResponse> LoginAsync(LoginGrpcRequest request)
@@ -43,6 +47,8 @@ public class IdentityGrpcService : IIdentityGrpcService
             var iv = EncryptionService.GenerateIV();
 
             user = await _userRepository.CreateAsync(request.ToDatabaseModel(hashedPassword, iv));
+
+            await _publishEndpoint.Publish(user.ToCreatedEvent());
         }
         catch (PostgresException e)
         {
