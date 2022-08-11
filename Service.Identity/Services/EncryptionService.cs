@@ -5,80 +5,80 @@ namespace Service.Identity.Services;
 
 public class EncryptionService
 {
-    private readonly byte[] _secretKey;
+	private readonly byte[] _secretKey;
 
-    public EncryptionService(string secretKey)
-    {
-        _secretKey = Convert.FromBase64String(secretKey);
-    }
+	public EncryptionService(string secretKey)
+	{
+		_secretKey = Convert.FromBase64String(secretKey);
+	}
 
-    public static string GenerateIV()
-    {
-        using var aes = Aes.Create();
+	public string GenerateIv()
+	{
+		using var aes = Aes.Create();
 
-        aes.GenerateIV();
+		aes.GenerateIV();
 
-        return Convert.ToBase64String(aes.IV);
-    }
+		return Convert.ToBase64String(aes.IV);
+	}
 
-    public string Encrypt(string input, string iv)
-    {
-        var inputArray = Encoding.Unicode.GetBytes(input);
-        var encrypted = Encrypt(inputArray, Convert.FromBase64String(iv));
+	public string Encrypt(string input, string iv)
+	{
+		var inputArray = Encoding.Unicode.GetBytes(input);
+		var encrypted = Encrypt(inputArray, Convert.FromBase64String(iv));
 
-        return Convert.ToBase64String(encrypted);
-    }
+		return Convert.ToBase64String(encrypted);
+	}
 
-    public string Decrypt(string input, string iv)
-    {
-        var inputArray = Convert.FromBase64String(input);
-        var decrypted = Decrypt(inputArray, Convert.FromBase64String(iv));
+	public string Decrypt(string input, string iv)
+	{
+		var inputArray = Convert.FromBase64String(input);
+		var decrypted = Decrypt(inputArray, Convert.FromBase64String(iv));
 
-        return Encoding.Unicode.GetString(decrypted);
-    }
+		return Encoding.Unicode.GetString(decrypted);
+	}
 
-    public static string Hash(string input)
-    {
-        return BCrypt.Net.BCrypt.HashPassword(input, 12);
-    }
+	public static string Hash(string input)
+	{
+		return BCrypt.Net.BCrypt.HashPassword(input, 12);
+	}
 
-    public bool VerifyHash(string input, string hashed)
-    {
-        return BCrypt.Net.BCrypt.Verify(input, hashed);
-    }
+	public bool VerifyHash(string input, string hashed)
+	{
+		return BCrypt.Net.BCrypt.Verify(input, hashed);
+	}
 
-    private byte[] Encrypt(byte[] input, byte[] iv)
-    {
-        using var aes = Aes.Create();
+	private byte[] Encrypt(byte[] input, byte[] iv)
+	{
+		using var aes = Aes.Create();
 
-        aes.Key = _secretKey;
-        aes.IV = iv;
+		aes.Key = _secretKey;
+		aes.IV = iv;
 
-        using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+		using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
-        return PerformCryptography(input, encryptor);
-    }
+		return PerformCryptography(input, encryptor);
+	}
 
-    private byte[] Decrypt(byte[] input, byte[] iv)
-    {
-        using var aes = Aes.Create();
+	private byte[] Decrypt(byte[] input, byte[] iv)
+	{
+		using var aes = Aes.Create();
 
-        aes.Key = _secretKey;
-        aes.IV = iv;
+		aes.Key = _secretKey;
+		aes.IV = iv;
 
-        using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+		using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-        return PerformCryptography(input, decryptor);
-    }
+		return PerformCryptography(input, decryptor);
+	}
 
-    private static byte[] PerformCryptography(byte[] data, ICryptoTransform cryptoTransform)
-    {
-        using var ms = new MemoryStream();
-        using var cryptoStream = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write);
+	private static byte[] PerformCryptography(byte[] data, ICryptoTransform cryptoTransform)
+	{
+		using var ms = new MemoryStream();
+		using var cryptoStream = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write);
 
-        cryptoStream.Write(data, 0, data.Length);
-        cryptoStream.FlushFinalBlock();
+		cryptoStream.Write(data, 0, data.Length);
+		cryptoStream.FlushFinalBlock();
 
-        return ms.ToArray();
-    }
+		return ms.ToArray();
+	}
 }

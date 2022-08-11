@@ -1,46 +1,77 @@
 using Dapper;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
+using Service.Identity.Scheme;
 
 namespace Service.Identity.Repository;
 
 public class UserRepository : IUserRepository
 {
-    private readonly DapperContext _context;
+	private readonly DapperContext _context;
 
-    public UserRepository(DapperContext dapperContext)
-    {
-        _context = dapperContext;
-    }
+	public UserRepository(DapperContext dapperContext)
+	{
+		_context = dapperContext;
+	}
 
-    public async Task<UserDatabaseModel> CreateAsync(UserDatabaseModel userDatabaseModel)
-    {
-        var createSql = $@"
+	public async Task<UserDatabaseModel> CreateAsync(UserDatabaseModel userDatabaseModel)
+	{
+		var createSql = $@"
             INSERT INTO {UserDatabaseSchema.Table}
             ({UserDatabaseSchema.Columns.Id},
             {UserDatabaseSchema.Columns.Email},
             {UserDatabaseSchema.Columns.Password},
-            {UserDatabaseSchema.Columns.Iv})
-            VALUES (@Id, @Email, @Password, @Iv)";
+            {UserDatabaseSchema.Columns.Iv},
+            {UserDatabaseSchema.Columns.Status})
+            VALUES (@Id, @Email, @Password, @Iv, @Status)";
 
-        using var connection = _context.CreateConnection();
+		using var connection = _context.CreateConnection();
 
-        await connection.ExecuteAsync(createSql, userDatabaseModel);
+		await connection.ExecuteAsync(createSql, userDatabaseModel);
 
-        return userDatabaseModel;
-    }
+		return userDatabaseModel;
+	}
 
-    public async Task<UserDatabaseModel?> FindByEmail(string email)
-    {
-        var sql = $@"SELECT * FROM {UserDatabaseSchema.Table} WHERE {UserDatabaseSchema.Columns.Email} = @Email";
+	public async Task<UserDatabaseModel?> FindByIdAsync(Guid id)
+	{
+		var sql = $@"SELECT * FROM {UserDatabaseSchema.Table} WHERE {UserDatabaseSchema.Columns.Id} = @Id";
 
-        using var connection = _context.CreateConnection();
+		using var connection = _context.CreateConnection();
 
-        var entity = await connection.QueryFirstOrDefaultAsync<UserDatabaseModel>(sql, new
-        {
-            Email = email
-        });
+		var entity = await connection.QueryFirstOrDefaultAsync<UserDatabaseModel>(sql, new
+		{
+			Id = id
+		});
 
-        return entity;
-    }
+		return entity;
+	}
+
+	public async Task<UserDatabaseModel?> FindByEmailAsync(string email)
+	{
+		var sql = $@"SELECT * FROM {UserDatabaseSchema.Table} WHERE {UserDatabaseSchema.Columns.Email} = @Email";
+
+		using var connection = _context.CreateConnection();
+
+		var entity = await connection.QueryFirstOrDefaultAsync<UserDatabaseModel>(sql, new
+		{
+			Email = email
+		});
+
+		return entity;
+	}
+
+	public async Task UpdateStatusAsync(Guid id, UserStatus status)
+	{
+		var sql = $@"UPDATE {UserDatabaseSchema.Table}
+			SET {UserDatabaseSchema.Columns.Status} = @Status
+			WHERE {UserDatabaseSchema.Columns.Id} = @Id";
+
+		using var connection = _context.CreateConnection();
+
+		await connection.ExecuteAsync(sql, new
+		{
+			Id = id,
+			Status = status
+		});
+	}
 }

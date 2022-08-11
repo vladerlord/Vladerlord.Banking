@@ -6,55 +6,61 @@ namespace Service.Identity.Models;
 
 public class UserDatabaseModel
 {
-    public Guid Id { get; }
-    public string Email { get; }
-    public string Password { get; }
-    public string Iv { get; }
+	public Guid Id { get; }
+	public string Email { get; }
+	public string Password { get; }
+	public string Iv { get; }
+	public UserStatus Status { get; }
 
-    public UserDatabaseModel(Guid id, string email, string password, string iv)
-    {
-        Id = id;
-        Email = email;
-        Password = password;
-        Iv = iv;
-    }
+	public UserDatabaseModel()
+	{
+		Email = string.Empty;
+		Password = string.Empty;
+		Iv = string.Empty;
+	}
 
-    public UserGrpcModel ToGrpcModel()
-    {
-        return new UserGrpcModel(Id, Email);
-    }
+	public UserDatabaseModel(Guid id, string email, string password, string iv, UserStatus status)
+	{
+		Id = id;
+		Email = email;
+		Password = password;
+		Iv = iv;
+		Status = status;
+	}
+
+	public UserGrpcModel ToGrpcModel()
+	{
+		return new UserGrpcModel
+		{
+			Id = Id,
+			Email = Email
+		};
+	}
+
+	public UserCreatedEvent ToCreatedEvent(string confirmationUrl)
+	{
+		return new UserCreatedEvent
+		{
+			Id = Id,
+			Email = Email,
+			ConfirmationLink = confirmationUrl
+		};
+	}
 }
 
-public static class UserDatabaseSchema
+public enum UserStatus
 {
-    public static string Table => "users";
-
-    public static class Columns
-    {
-        public static string Id { get; } = nameof(UserDatabaseModel.Id).ToSnakeCase();
-        public static string Email { get; } = nameof(UserDatabaseModel.Email).ToSnakeCase();
-        public static string Password { get; } = nameof(UserDatabaseModel.Password).ToSnakeCase();
-        public static string Iv { get; } = nameof(UserDatabaseModel.Iv).ToSnakeCase();
-    }
-}
-
-public static class UserDatabaseModelExtensions
-{
-    public static UserCreatedEvent ToCreatedEvent(this UserDatabaseModel user)
-    {
-        return new UserCreatedEvent
-        {
-            Id = user.Id,
-            Email = user.Email
-        };
-    }
+	Created,
+	Confirmed,
+	Approved,
+	Admin
 }
 
 public static class RegisterGrpcRequestExtensions
 {
-    public static UserDatabaseModel ToDatabaseModel(this RegisterUserGrpcRequest request, string hashedPassword,
-        string iv)
-    {
-        return new UserDatabaseModel(Guid.NewGuid(), request.Email, hashedPassword, iv);
-    }
+	public static UserDatabaseModel ToDatabaseModel(this RegisterUserGrpcRequest request, string hashedPassword,
+		string iv, UserStatus status)
+	{
+		return new UserDatabaseModel(Guid.NewGuid(), request.Email, hashedPassword, iv, status);
+	}
 }

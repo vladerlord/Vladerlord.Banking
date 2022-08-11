@@ -14,10 +14,11 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7202;http://localhost:5100",
+      "applicationUrl": "https://localhost:7202;http://localhost:5100;http://vladerlord.fun:5100",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "IDENTITY_GRPC": "http://localhost:5074"
+        "IDENTITY_GRPC": "http://localhost:5074",
+        "DOMAIN": "http://vladerlord.fun:5100"
       }
     }
   }

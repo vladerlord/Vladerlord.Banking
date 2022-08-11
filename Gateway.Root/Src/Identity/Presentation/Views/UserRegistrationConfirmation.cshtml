@@ -1,0 +1,25 @@
+@model Gateway.Root.Identity.Presentation.Views.UserRegistrationConfirmation
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Registration confirmation</title>
+</head>
+<body>
+<div>
+    @if (Model.IsSuccess)
+    {
+        <p>Your registration is successful</p>
+    }
+    else
+    {
+        <p>There's been some error</p>
+    }
+</div>
+</body>
+</html>

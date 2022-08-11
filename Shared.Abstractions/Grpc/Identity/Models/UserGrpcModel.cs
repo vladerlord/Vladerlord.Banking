@@ -5,12 +5,6 @@ namespace Shared.Abstractions.Grpc.Identity.Models;
 [DataContract]
 public class UserGrpcModel
 {
-    [DataMember(Order = 1)] public Guid Id;
-    [DataMember(Order = 2)] public string Email;
-
-    public UserGrpcModel(Guid id, string email)
-    {
-        Id = id;
-        Email = email;
-    }
+	[DataMember(Order = 1)] public Guid Id { get; init; }
+	[DataMember(Order = 2)] public string Email { get; init; } = null!;
 }
