@@ -15,6 +15,6 @@ public class RegisterUserGrpcRequest
 [DataContract]
 public class RegisterUserGrpcResponse
 {
-	[DataMember(Order = 1)] public IdentityResponseStatus Status { get; set; }
+	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
 	[DataMember(Order = 2)] public UserGrpcModel? UserModel { get; set; }
 }

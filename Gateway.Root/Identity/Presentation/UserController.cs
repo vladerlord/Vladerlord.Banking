@@ -2,6 +2,7 @@ using Gateway.Root.Identity.Application;
 using Gateway.Root.Identity.Presentation.Models;
 using Gateway.Root.Identity.Presentation.Views;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Abstractions.Grpc;
 using Shared.Abstractions.Grpc.Identity;
 using Shared.Abstractions.Grpc.Identity.Contracts;
 
@@ -59,9 +60,9 @@ public class UserController : Controller
 
 		var viewModel = new UserRegistrationConfirmation
 		{
-			IsSuccess = response.Status == IdentityResponseStatus.Ok
+			IsSuccess = response.Status == GrpcResponseStatus.Ok
 		};
 
-		return View("~/Src/Identity/Presentation/Views/UserRegistrationConfirmation.cshtml", viewModel);
+		return View("~/Identity/Presentation/Views/UserRegistrationConfirmation.cshtml", viewModel);
 	}
 }

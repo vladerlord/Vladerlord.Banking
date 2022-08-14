@@ -9,22 +9,19 @@ public class UserDatabaseModel
 	public Guid Id { get; }
 	public string Email { get; }
 	public string Password { get; }
-	public string Iv { get; }
 	public UserStatus Status { get; }
 
 	public UserDatabaseModel()
 	{
 		Email = string.Empty;
 		Password = string.Empty;
-		Iv = string.Empty;
 	}
 
-	public UserDatabaseModel(Guid id, string email, string password, string iv, UserStatus status)
+	public UserDatabaseModel(Guid id, string email, string password, UserStatus status)
 	{
 		Id = id;
 		Email = email;
 		Password = password;
-		Iv = iv;
 		Status = status;
 	}
 
@@ -59,8 +56,8 @@ public enum UserStatus
 public static class RegisterGrpcRequestExtensions
 {
 	public static UserDatabaseModel ToDatabaseModel(this RegisterUserGrpcRequest request, string hashedPassword,
-		string iv, UserStatus status)
+		UserStatus status)
 	{
-		return new UserDatabaseModel(Guid.NewGuid(), request.Email, hashedPassword, iv, status);
+		return new UserDatabaseModel(Guid.NewGuid(), request.Email, hashedPassword, status);
 	}
 }

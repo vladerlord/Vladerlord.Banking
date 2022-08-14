@@ -1,3 +1,4 @@
+using Chassis;
 using Service.Identity.Migrations;
 using Service.Identity.Models;
 

@@ -1,3 +1,4 @@
+using Chassis.Grpc;
 using Dapper;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;

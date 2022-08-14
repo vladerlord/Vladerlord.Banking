@@ -11,5 +11,6 @@ public class VerifyTokenGrpcRequest
 [DataContract]
 public class VerifyTokenGrpcResponse
 {
-	[DataMember(Order = 1)] public IdentityResponseStatus Status { get; set; }
+	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
+	[DataMember(Order = 2)] public List<KeyValuePair<string, string>>? Claims { get; set; }
 }

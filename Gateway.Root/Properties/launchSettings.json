@@ -18,6 +18,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "IDENTITY_GRPC": "http://localhost:5074",
+        "PERSONAL_DATA_GRPC": "http://localhost:5073",
         "DOMAIN": "http://vladerlord.fun:5100"
       }
     }

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Service.Identity.Services;
+namespace Service.PersonalData.Services;
 
 public class EncryptionService
 {
@@ -21,6 +21,8 @@ public class EncryptionService
 		return Convert.ToBase64String(aes.IV);
 	}
 
+	public byte[] IvToBytes(string iv) => Convert.FromBase64String(iv);
+
 	public string Encrypt(string input, string iv)
 	{
 		var inputArray = Encoding.Unicode.GetBytes(input);
@@ -37,17 +39,7 @@ public class EncryptionService
 		return Encoding.Unicode.GetString(decrypted);
 	}
 
-	public static string Hash(string input)
-	{
-		return BCrypt.Net.BCrypt.HashPassword(input, 12);
-	}
-
-	public bool VerifyHash(string input, string hashed)
-	{
-		return BCrypt.Net.BCrypt.Verify(input, hashed);
-	}
-
-	private byte[] Encrypt(byte[] input, byte[] iv)
+	public byte[] Encrypt(byte[] input, byte[] iv)
 	{
 		using var aes = Aes.Create();
 
@@ -59,7 +51,7 @@ public class EncryptionService
 		return PerformCryptography(input, encryptor);
 	}
 
-	private byte[] Decrypt(byte[] input, byte[] iv)
+	public byte[] Decrypt(byte[] input, byte[] iv)
 	{
 		using var aes = Aes.Create();
 

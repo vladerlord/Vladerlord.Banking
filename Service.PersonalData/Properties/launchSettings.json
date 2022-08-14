@@ -1,0 +1,16 @@
+﻿{
+  "profiles": {
+    "Service.PersonalData": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5073;https://localhost:7159",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "PERSONAL_DATA_DB_CONNECTION": "Host=localhost;Port=5433;Username=user;Password=password;Database=personal_data",
+        "IDENTITY_SCANS_VOLUME_FOLDER": "/Users/vladerlord/Projects/Volumes/Banking",
+        "SECURITY_ENCRYPTION_KEY": "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM="
+      }
+    }
+  }
+}

@@ -1,9 +1,8 @@
 using System.Reflection;
-using Chassis.Grpc;
-using FluentMigrator.Runner;
+using Chassis;
+using Dapper;
 using MassTransit;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Npgsql.Logging;
 using ProtoBuf.Grpc.Server;
 using Serilog;
 using Service.Identity;
@@ -12,15 +11,21 @@ using Service.Identity.Repository;
 using Service.Identity.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var identityConnectionString = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_DB_CONNECTION");
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-ConfigureLogging();
-AddServices(builder.Services);
+StartupUtils.ConfigureLogging(builder);
+Chassis.Grpc.StartupUtils.ConfigureDapperContextBuilder(builder, identityConnectionString);
+Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingBuilder(builder);
+Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, identityConnectionString,
+	Assembly.GetExecutingAssembly());
+BindSystemServices(builder.Services);
+BindAppServices(builder.Services);
+BindRepositories(builder.Services);
 ConfigureRabbitmq();
 
-builder.Host.UseSerilog();
 builder.WebHost.ConfigureKestrel(options =>
 {
 	// metrics port
@@ -31,98 +36,40 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-ConfigurePostgres();
+Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingApp(app);
+Chassis.Grpc.StartupUtils.ConfigureFluentMigratorApp(app);
 
 app.MapGrpcService<IdentityGrpcService>();
-
 app.Run();
 
-void AddServices(IServiceCollection services)
+void BindSystemServices(IServiceCollection services)
 {
 	services.AddCodeFirstGrpc();
 	services.AddGrpc();
 
-	var identityConnectionString = Environment.GetEnvironmentVariable("IDENTITY_DB_CONNECTION");
-	var jwtSecret = Environment.GetEnvironmentVariable("SECURITY_JWT_SECRET");
-	var jwtExpirationMinutes = Environment.GetEnvironmentVariable("SECURITY_JWT_EXPIRATION_MINUTES");
-	var encryptionKey = Environment.GetEnvironmentVariable("SECURITY_ENCRYPTION_KEY");
-
-	if (identityConnectionString == null)
-		throw new Exception($"env IDENTITY_DB_CONNECTION is not set");
-
-	if (jwtSecret == null || jwtExpirationMinutes == null)
-		throw new Exception("env SECURITY_JWT_SECRET or SECURITY_JWT_EXPIRATION_MINUTES is not set");
-
-	if (encryptionKey == null)
-		throw new Exception("env SECURITY_ENCRYPTION_KEY is not set");
-
-	services.AddSingleton(new DapperContext(identityConnectionString));
 	services.AddSingleton(Log.Logger);
+}
+
+void BindRepositories(IServiceCollection services)
+{
 	services.AddScoped<IUserRepository, UserRepository>();
 	services.AddScoped<IConfirmationLinkRepository, ConfirmationLinkRepository>();
+}
+
+void BindAppServices(IServiceCollection services)
+{
+	var jwtSecret = EnvironmentUtils.GetRequiredEnvironmentVariable("SECURITY_JWT_SECRET");
+	var jwtExpirationMinutes = EnvironmentUtils.GetRequiredEnvironmentVariable("SECURITY_JWT_EXPIRATION_MINUTES");
+
 	services.AddSingleton(new TokenAuthService(jwtSecret, int.Parse(jwtExpirationMinutes)));
-	services.AddSingleton(new EncryptionService(encryptionKey));
-
-	builder.Services.AddSingleton<SerilogNpgsqlLogger>();
-	builder.Services.AddSingleton<INpgsqlLoggingProvider, SerilogNgpsqlLoggingProvider>();
-
-	services
-		.AddFluentMigratorCore()
-		.ConfigureRunner(fluentMigratorBuilder => fluentMigratorBuilder
-			.AddPostgres()
-			.WithGlobalConnectionString(identityConnectionString)
-			.ScanIn(Assembly.GetExecutingAssembly()).For.Migrations()
-		);
-}
-
-void ConfigureLogging()
-{
-	var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-	if (environment == null)
-		throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
-
-	var config = new LoggerConfiguration()
-		.Enrich.FromLogContext()
-		.Enrich.WithMachineName()
-		.Enrich.WithProperty("Environment", environment)
-		.Filter.ByExcluding(c =>
-			c.Properties.Any(p =>
-			{
-				var (_, value) = p;
-				return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
-			}))
-		.WriteTo.Console();
-
-	if (builder.Environment.IsDevelopment())
-		config.MinimumLevel.Debug();
-
-	Log.Logger = config.CreateLogger();
-}
-
-void ConfigurePostgres()
-{
-	var provider = app.Services.GetService<INpgsqlLoggingProvider>();
-
-	if (provider == null)
-		throw new Exception("INpgsqlLoggingProvider is not defined for DI");
-
-	NpgsqlLogManager.Provider = provider;
-
-	if (app.Environment.IsDevelopment())
-		NpgsqlLogManager.IsParameterLoggingEnabled = true;
-
-	app.MigrateDatabase();
+	services.AddSingleton<HashService>();
 }
 
 void ConfigureRabbitmq()
 {
-	var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
-	var user = Environment.GetEnvironmentVariable("RABBITMQ_USER");
-	var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-
-	if (host == null || user == null || password == null)
-		throw new Exception($"env RABBITMQ_HOST/RABBITMQ_USER/RABBITMQ_PASSWORD is not set");
+	var host = EnvironmentUtils.GetRequiredEnvironmentVariable("RABBITMQ_HOST");
+	var user = EnvironmentUtils.GetRequiredEnvironmentVariable("RABBITMQ_USER");
+	var password = EnvironmentUtils.GetRequiredEnvironmentVariable("RABBITMQ_PASSWORD");
 
 	builder.Services.AddMassTransit(busConfig =>
 	{

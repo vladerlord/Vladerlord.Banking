@@ -11,5 +11,5 @@ public class RegisterConfirmationGrpcRequest
 [DataContract]
 public class RegisterConfirmationGrpcResponse
 {
-	[DataMember(Order = 1)] public IdentityResponseStatus Status { get; set; }
+	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
 }

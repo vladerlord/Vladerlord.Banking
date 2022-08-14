@@ -1,6 +1,6 @@
 using System.Net;
 using System.Runtime.Serialization;
-using Shared.Abstractions.Grpc.Identity;
+using Shared.Abstractions.Grpc;
 using Shared.Abstractions.Grpc.Identity.Contracts;
 
 namespace Gateway.Root.Identity.Presentation.Models;
@@ -25,19 +25,19 @@ public class LoginUserHttpResponse
 	[DataMember] public int StatusCode { get; }
 	[DataMember] public string? Jwt { get; }
 
-	public LoginUserHttpResponse(IdentityResponseStatus status, string? jwt)
+	public LoginUserHttpResponse(GrpcResponseStatus status, string? jwt)
 	{
 		Status = status.ToString();
 		StatusCode = TransformStatus(status);
 		Jwt = jwt;
 	}
 
-	private static int TransformStatus(IdentityResponseStatus status)
+	private static int TransformStatus(GrpcResponseStatus status)
 	{
 		return status switch
 		{
-			IdentityResponseStatus.Ok => (int)HttpStatusCode.OK,
-			IdentityResponseStatus.NotFound => (int)HttpStatusCode.NotFound,
+			GrpcResponseStatus.Ok => (int)HttpStatusCode.OK,
+			GrpcResponseStatus.NotFound => (int)HttpStatusCode.NotFound,
 			_ => (int)HttpStatusCode.BadRequest
 		};
 	}

@@ -1,3 +1,4 @@
+using Chassis.Grpc;
 using Dapper;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
@@ -21,9 +22,8 @@ public class UserRepository : IUserRepository
             ({UserDatabaseSchema.Columns.Id},
             {UserDatabaseSchema.Columns.Email},
             {UserDatabaseSchema.Columns.Password},
-            {UserDatabaseSchema.Columns.Iv},
             {UserDatabaseSchema.Columns.Status})
-            VALUES (@Id, @Email, @Password, @Iv, @Status)";
+            VALUES (@Id, @Email, @Password, @Status)";
 
 		using var connection = _context.CreateConnection();
 

@@ -13,7 +13,6 @@ public class CreateUsersTable: Migration
             .WithColumn("id").AsGuid().NotNullable().PrimaryKey()
             .WithColumn("email").AsString(320).NotNullable().Unique()
             .WithColumn("password").AsString(255).NotNullable()
-            .WithColumn("iv").AsString(24).NotNullable()
             .WithColumn("status").AsInt32().NotNullable();
     }
 

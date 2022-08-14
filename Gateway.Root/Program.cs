@@ -1,11 +1,16 @@
+using Chassis;
 using Chassis.Gateway;
 using FluentValidation.AspNetCore;
 using Gateway.Root.Identity.Application;
+using Gateway.Root.PersonalData.Application;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Abstractions.Grpc.Identity;
+using Shared.Abstractions.Grpc.PersonalData;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StartupUtils.ConfigureLogging(builder);
 
 builder.Services
 	.AddControllers(options => { options.Filters.Add(typeof(ValidateModelStateAttribute)); })
@@ -21,13 +26,11 @@ builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true
 
 builder.Services.AddScoped(provider =>
 {
-	var domain = Environment.GetEnvironmentVariable("DOMAIN");
-
-	if (domain == null)
-		throw new Exception("env DOMAIN is not set");
+	var domain = EnvironmentUtils.GetRequiredEnvironmentVariable("DOMAIN");
 
 	return new UserResetService(domain, provider.GetRequiredService<LinkGenerator>());
 });
+builder.Services.AddScoped<PersonalDataService>();
 
 BindGrpcServices(builder);
 
@@ -52,10 +55,9 @@ app.Run();
 
 void BindGrpcServices(WebApplicationBuilder weBuilder)
 {
-	var identityGrpc = Environment.GetEnvironmentVariable("IDENTITY_GRPC");
-
-	if (identityGrpc == null)
-		throw new Exception("IDENTITY_GRPC is not set");
+	var identityGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_GRPC");
+	var personalDataGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("PERSONAL_DATA_GRPC");
 
 	weBuilder.Services.AddGrpcService<IIdentityGrpcService>(identityGrpc);
+	weBuilder.Services.AddGrpcService<IPersonalDataGrpcService>(personalDataGrpc);
 }
