@@ -26,13 +26,15 @@ public class ApplyPersonalDataGrpcRequest
 public class ApplyPersonalDataGrpcResponse
 {
 	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
+	[DataMember(Order = 2)] public PersonalDataGrpcModel? PersonalData { get; set; }
 
 	public ApplyPersonalDataGrpcResponse()
 	{
 	}
 
-	public ApplyPersonalDataGrpcResponse(GrpcResponseStatus status)
+	public ApplyPersonalDataGrpcResponse(GrpcResponseStatus status, PersonalDataGrpcModel? personalData)
 	{
 		Status = status;
+		PersonalData = personalData;
 	}
 }

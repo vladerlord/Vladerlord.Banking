@@ -1,4 +1,5 @@
 using Shared.Abstractions.Grpc.PersonalData.Contracts;
+using Shared.Abstractions.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData.Models;
 
@@ -31,6 +32,19 @@ public class PersonalDataDatabaseModel
 		Country = country;
 		City = city;
 		Iv = iv;
+	}
+
+	public PersonalDataGrpcModel ToGrpcModel()
+	{
+		return new PersonalDataGrpcModel
+		{
+			Id = Id,
+			UserId = UserId,
+			FirstName = FirstName,
+			LastName = LastName,
+			Country = Country,
+			City = City
+		};
 	}
 }
 

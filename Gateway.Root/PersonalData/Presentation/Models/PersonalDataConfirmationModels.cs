@@ -1,7 +1,5 @@
-using System.Net;
 using System.Runtime.Serialization;
 using Gateway.Root.PersonalData.Domain;
-using Shared.Abstractions.Grpc;
 
 namespace Gateway.Root.PersonalData.Presentation.Models;
 
@@ -25,20 +23,12 @@ public class SendPersonalDataConfirmationResponse
 {
 	[DataMember] public string Status { get; }
 	[DataMember] public int StatusCode { get; }
+	[DataMember] public PersonalDataDto? PersonalData { get; }
 
-	public SendPersonalDataConfirmationResponse(GrpcResponseStatus status)
+	public SendPersonalDataConfirmationResponse(PersonalDataConfirmationResponseDto responseDto)
 	{
-		Status = status.ToString();
-		StatusCode = TransformStatus(status);
-	}
-
-	private static int TransformStatus(GrpcResponseStatus status)
-	{
-		return status switch
-		{
-			GrpcResponseStatus.Ok => (int)HttpStatusCode.OK,
-			GrpcResponseStatus.Error => (int)HttpStatusCode.BadRequest,
-			_ => (int)HttpStatusCode.BadRequest
-		};
+		Status = responseDto.Status;
+		StatusCode = responseDto.StatusCode;
+		PersonalData = responseDto.PersonalData;
 	}
 }

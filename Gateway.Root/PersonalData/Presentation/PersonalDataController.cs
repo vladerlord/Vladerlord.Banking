@@ -25,7 +25,7 @@ public class PersonalDataController : ControllerBase
 		var requestDto = request.ToPersonalDataConfirmationDto(userId);
 
 		var response = await _personalDataService.SendPersonalDataConfirmationRequest(requestDto);
-		var httpResponse = new SendPersonalDataConfirmationResponse(response.Status);
+		var httpResponse = new SendPersonalDataConfirmationResponse(response);
 
 		return new JsonResult(httpResponse)
 		{

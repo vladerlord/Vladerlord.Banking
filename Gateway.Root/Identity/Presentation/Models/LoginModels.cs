@@ -1,4 +1,3 @@
-using System.Net;
 using System.Runtime.Serialization;
 using Shared.Abstractions.Grpc;
 using Shared.Abstractions.Grpc.Identity.Contracts;
@@ -28,18 +27,8 @@ public class LoginUserHttpResponse
 	public LoginUserHttpResponse(GrpcResponseStatus status, string? jwt)
 	{
 		Status = status.ToString();
-		StatusCode = TransformStatus(status);
+		StatusCode = status.ToHttpCode();
 		Jwt = jwt;
-	}
-
-	private static int TransformStatus(GrpcResponseStatus status)
-	{
-		return status switch
-		{
-			GrpcResponseStatus.Ok => (int)HttpStatusCode.OK,
-			GrpcResponseStatus.NotFound => (int)HttpStatusCode.NotFound,
-			_ => (int)HttpStatusCode.BadRequest
-		};
 	}
 }
 

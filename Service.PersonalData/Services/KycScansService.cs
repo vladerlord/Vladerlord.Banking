@@ -8,14 +8,14 @@ public class KycScansService
 {
 	private readonly KycScansFileService _kycScansFileService;
 	private readonly IKycScanRepository _kycScanRepository;
-	private readonly EncryptionService _encryptionService;
+	private readonly KycScanEncryptionService _kycScanEncryptionService;
 
 	public KycScansService(KycScansFileService kycScansFileService, IKycScanRepository kycScanRepository,
-		EncryptionService encryptionService)
+		KycScanEncryptionService kycScanEncryptionService)
 	{
 		_kycScansFileService = kycScansFileService;
 		_kycScanRepository = kycScanRepository;
-		_encryptionService = encryptionService;
+		_kycScanEncryptionService = kycScanEncryptionService;
 	}
 
 	public async Task Create(List<KycScanGrpcModel> kycScans, PersonalDataDatabaseModel personalData)
@@ -24,8 +24,7 @@ public class KycScansService
 		{
 			var kycScanDatabaseModel = kycScanGrpcModel.ToDatabaseModel(personalData.Id);
 
-			var iv = _encryptionService.IvToBytes(personalData.Iv);
-			kycScanGrpcModel.Content = _encryptionService.Encrypt(kycScanGrpcModel.Content, iv);
+			_kycScanEncryptionService.EncryptGrpcModel(kycScanGrpcModel, personalData.Iv);
 
 			await _kycScansFileService.SaveKycScan(kycScanGrpcModel, kycScanDatabaseModel.FileName.ToString());
 			await _kycScanRepository.CreateAsync(kycScanDatabaseModel);

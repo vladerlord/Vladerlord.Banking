@@ -55,4 +55,6 @@ void BindAppServices(IServiceCollection services)
 	services.AddScoped(_ => new KycScansFileService(scansFolder));
 	services.AddScoped<KycScansService>();
 	services.AddScoped<PersonalDataService>();
+	services.AddScoped<PersonalDataEncryptionService>();
+	services.AddScoped<KycScanEncryptionService>();
 }

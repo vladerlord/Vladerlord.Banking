@@ -13,12 +13,14 @@ public class PersonalDataService
 		_personalDataGrpcService = personalDataGrpcService;
 	}
 
-	public async Task<ApplyPersonalDataGrpcResponse> SendPersonalDataConfirmationRequest(
+	public async Task<PersonalDataConfirmationResponseDto> SendPersonalDataConfirmationRequest(
 		PersonalDataConfirmationDto dto)
 	{
 		var kycScansGrpcModels = await dto.ToKycScanGrpcModels();
 		var request = new ApplyPersonalDataGrpcRequest(dto.ToPersonalDataGrpcModel(), kycScansGrpcModels);
 
-		return await _personalDataGrpcService.ApplyPersonalDataAsync(request);
+		var response = await _personalDataGrpcService.ApplyPersonalDataAsync(request);
+
+		return new PersonalDataConfirmationResponseDto(response.Status, response.PersonalData?.ToDto());
 	}
 }

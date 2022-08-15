@@ -1,4 +1,3 @@
-using System.Net;
 using System.Runtime.Serialization;
 using Shared.Abstractions.Grpc;
 using Shared.Abstractions.Grpc.Identity.Contracts;
@@ -38,17 +37,6 @@ public class RegisterUserHttpResponse
 	public RegisterUserHttpResponse(GrpcResponseStatus status)
 	{
 		Status = status.ToString();
-		StatusCode = TransformStatus(status);
-	}
-
-	private static int TransformStatus(GrpcResponseStatus status)
-	{
-		return status switch
-		{
-			GrpcResponseStatus.Ok => (int)HttpStatusCode.OK,
-			GrpcResponseStatus.NotFound => (int)HttpStatusCode.NotFound,
-			GrpcResponseStatus.UserAlreadyExist => (int)HttpStatusCode.Conflict,
-			_ => (int)HttpStatusCode.BadRequest
-		};
+		StatusCode = status.ToHttpCode();
 	}
 }
