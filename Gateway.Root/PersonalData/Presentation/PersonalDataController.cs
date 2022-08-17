@@ -22,9 +22,9 @@ public class PersonalDataController : ControllerBase
 		[FromForm] SendPersonalDataConfirmationRequest request)
 	{
 		var userId = HttpContext.GetUserId();
-		var requestDto = request.ToPersonalDataConfirmationDto(userId);
+		var appDto = request.ToPersonalDataConfirmationDto(userId);
 
-		var response = await _personalDataService.SendPersonalDataConfirmationRequest(requestDto);
+		var response = await _personalDataService.SendPersonalDataConfirmationRequest(appDto);
 		var httpResponse = new SendPersonalDataConfirmationResponse(response);
 
 		return new JsonResult(httpResponse)

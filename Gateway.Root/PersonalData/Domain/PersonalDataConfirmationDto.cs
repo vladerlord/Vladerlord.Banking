@@ -1,4 +1,4 @@
-using Shared.Abstractions.Grpc.PersonalData.Models;
+using Shared.Grpc.PersonalData.Models;
 
 namespace Gateway.Root.PersonalData.Domain;
 
@@ -27,9 +27,9 @@ public class PersonalDataConfirmationDto
 		KycScans = kycScans;
 	}
 
-	public PersonalDataGrpcModel ToPersonalDataGrpcModel()
+	public PersonalDataCreateGrpcModel ToPersonalDataCreateGrpcModel()
 	{
-		return new PersonalDataGrpcModel
+		return new PersonalDataCreateGrpcModel
 		{
 			UserId = UserId,
 			FirstName = FirstName,
@@ -39,20 +39,21 @@ public class PersonalDataConfirmationDto
 		};
 	}
 
-	public async Task<List<KycScanGrpcModel>> ToKycScanGrpcModels()
+	public async Task<List<KycScanCreateGrpcModel>> ToKycScanCreateGrpcModels()
 	{
-		var scans = new List<KycScanGrpcModel>();
+		var scans = new List<KycScanCreateGrpcModel>();
 
 		foreach (var scan in KycScans)
 		{
 			await using var ms = new MemoryStream();
 			await scan.CopyToAsync(ms);
 
-			scans.Add(new KycScanGrpcModel
+			scans.Add(new KycScanCreateGrpcModel
 			{
 				FileName = Path.GetFileNameWithoutExtension(scan.FileName),
 				FileExtension = Path.GetExtension(scan.FileName),
-				Content = ms.ToArray()
+				Content = ms.ToArray(),
+				ContentType = scan.ContentType
 			});
 		}
 

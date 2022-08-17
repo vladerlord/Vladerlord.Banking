@@ -1,5 +1,5 @@
 using Service.PersonalData.Models;
-using Shared.Abstractions.Grpc.PersonalData.Models;
+using Shared.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData.Services;
 
@@ -12,7 +12,7 @@ public class KycScansFileService
 		_scansFolderPath = scansFolderPath;
 	}
 
-	public async Task SaveKycScan(KycScanGrpcModel kycScanGrpcModel, string fileName)
+	public async Task SaveKycScan(KycScanCreateGrpcModel kycScanGrpcModel, string fileName)
 	{
 		var path = $"{_scansFolderPath}/{fileName}{kycScanGrpcModel.FileExtension}";
 
@@ -26,5 +26,12 @@ public class KycScansFileService
 
 		if (File.Exists(path))
 			File.Delete(path);
+	}
+
+	public async Task<byte[]> GetKyсScanContentAsync(KycScanDatabaseModel kycScan)
+	{
+		var path = $"{_scansFolderPath}/{kycScan.FileName}{kycScan.FileExtension}";
+
+		return await File.ReadAllBytesAsync(path);
 	}
 }

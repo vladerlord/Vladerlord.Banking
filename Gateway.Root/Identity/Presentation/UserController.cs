@@ -2,9 +2,9 @@ using Gateway.Root.Identity.Application;
 using Gateway.Root.Identity.Presentation.Models;
 using Gateway.Root.Identity.Presentation.Views;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Abstractions.Grpc;
-using Shared.Abstractions.Grpc.Identity;
-using Shared.Abstractions.Grpc.Identity.Contracts;
+using Shared.Grpc;
+using Shared.Grpc.Identity;
+using Shared.Grpc.Identity.Contracts;
 
 namespace Gateway.Root.Identity.Presentation;
 

@@ -7,11 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Grpc.AspNetCore" Version="2.47.0" />
-      <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
-      <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
-      <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
-      <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="6.0.1"/>
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj"/>
+        <ProjectReference Include="..\Shared.Grpc\Shared.Grpc.csproj"/>
     </ItemGroup>
 
 </Project>

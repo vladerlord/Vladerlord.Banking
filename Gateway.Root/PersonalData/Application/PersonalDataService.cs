@@ -1,6 +1,6 @@
 using Gateway.Root.PersonalData.Domain;
-using Shared.Abstractions.Grpc.PersonalData;
-using Shared.Abstractions.Grpc.PersonalData.Contracts;
+using Shared.Grpc.PersonalData;
+using Shared.Grpc.PersonalData.Contracts;
 
 namespace Gateway.Root.PersonalData.Application;
 
@@ -16,8 +16,8 @@ public class PersonalDataService
 	public async Task<PersonalDataConfirmationResponseDto> SendPersonalDataConfirmationRequest(
 		PersonalDataConfirmationDto dto)
 	{
-		var kycScansGrpcModels = await dto.ToKycScanGrpcModels();
-		var request = new ApplyPersonalDataGrpcRequest(dto.ToPersonalDataGrpcModel(), kycScansGrpcModels);
+		var kycScansCreateGrpcModels = await dto.ToKycScanCreateGrpcModels();
+		var request = new ApplyPersonalDataGrpcRequest(dto.ToPersonalDataCreateGrpcModel(), kycScansCreateGrpcModels);
 
 		var response = await _personalDataGrpcService.ApplyPersonalDataAsync(request);
 

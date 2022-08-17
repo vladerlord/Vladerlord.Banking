@@ -1,7 +1,7 @@
 using System.ServiceModel;
-using Shared.Abstractions.Grpc.Identity.Contracts;
+using Shared.Grpc.Identity.Contracts;
 
-namespace Shared.Abstractions.Grpc.Identity;
+namespace Shared.Grpc.Identity;
 
 [ServiceContract(Name = "IdentityGrpcService")]
 public interface IIdentityGrpcService

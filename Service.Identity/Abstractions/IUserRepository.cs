@@ -1,4 +1,5 @@
 using Service.Identity.Models;
+using Shared.Abstractions;
 
 namespace Service.Identity.Abstractions;
 

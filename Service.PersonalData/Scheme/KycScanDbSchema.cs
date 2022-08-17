@@ -14,6 +14,7 @@ public static class KycScanDbSchema
 		public static string PersonalDataId { get; }
 		public static string FileExtension { get; }
 		public static string OriginalName { get; }
+		public static string ContentType { get; }
 
 		static Columns()
 		{
@@ -21,6 +22,7 @@ public static class KycScanDbSchema
 			PersonalDataId = nameof(KycScanDatabaseModel.PersonalDataId).ToSnakeCase();
 			FileExtension = nameof(KycScanDatabaseModel.FileExtension).ToSnakeCase();
 			OriginalName = nameof(KycScanDatabaseModel.OriginalName).ToSnakeCase();
+			ContentType = nameof(KycScanDatabaseModel.ContentType).ToSnakeCase();
 		}
 	}
 }

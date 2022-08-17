@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.IdentityNotifier.Ra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.PersonalData", "Service.PersonalData\Service.PersonalData.csproj", "{2DF20575-D78B-434F-9BF3-7B25393C82A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Grpc", "Shared.Grpc\Shared.Grpc.csproj", "{0FCEC1D6-8CAD-41DC-8B9C-269E8F44016E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,9 @@ Global
 		{2DF20575-D78B-434F-9BF3-7B25393C82A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DF20575-D78B-434F-9BF3-7B25393C82A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DF20575-D78B-434F-9BF3-7B25393C82A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FCEC1D6-8CAD-41DC-8B9C-269E8F44016E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FCEC1D6-8CAD-41DC-8B9C-269E8F44016E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FCEC1D6-8CAD-41DC-8B9C-269E8F44016E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FCEC1D6-8CAD-41DC-8B9C-269E8F44016E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

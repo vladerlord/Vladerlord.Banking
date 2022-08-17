@@ -3,9 +3,10 @@ using Npgsql;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
 using Service.Identity.Services;
-using Shared.Abstractions.Grpc;
-using Shared.Abstractions.Grpc.Identity;
-using Shared.Abstractions.Grpc.Identity.Contracts;
+using Shared.Abstractions;
+using Shared.Grpc;
+using Shared.Grpc.Identity;
+using Shared.Grpc.Identity.Contracts;
 
 namespace Service.Identity;
 
@@ -45,7 +46,7 @@ public class IdentityGrpcService : IIdentityGrpcService
 		return new LoginGrpcResponse
 		{
 			Status = GrpcResponseStatus.Ok,
-			Jwt = _tokenAuthService.GenerateToken(user.Id, user.Email)
+			Jwt = _tokenAuthService.GenerateToken(user)
 		};
 	}
 

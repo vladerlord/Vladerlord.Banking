@@ -17,6 +17,7 @@ public static class PersonalDataDbSchema
 		public static string Country { get; }
 		public static string City { get; }
 		public static string Iv { get; }
+		public static string Status { get; }
 
 		static Columns()
 		{
@@ -27,6 +28,7 @@ public static class PersonalDataDbSchema
 			Country = nameof(PersonalDataDatabaseModel.Country).ToSnakeCase();
 			City = nameof(PersonalDataDatabaseModel.City).ToSnakeCase();
 			Iv = nameof(PersonalDataDatabaseModel.Iv).ToSnakeCase();
+			Status = nameof(PersonalDataDatabaseModel.Status).ToSnakeCase();
 		}
 	}
 }

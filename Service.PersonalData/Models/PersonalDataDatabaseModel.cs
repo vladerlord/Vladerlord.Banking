@@ -1,5 +1,5 @@
-using Shared.Abstractions.Grpc.PersonalData.Contracts;
-using Shared.Abstractions.Grpc.PersonalData.Models;
+using Shared.Grpc.PersonalData.Contracts;
+using Shared.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData.Models;
 
@@ -12,6 +12,7 @@ public class PersonalDataDatabaseModel
 	public string Country { get; set; }
 	public string City { get; set; }
 	public string Iv { get; set; }
+	public PersonalDataStatus Status { get; set; }
 
 	public PersonalDataDatabaseModel()
 	{
@@ -23,7 +24,7 @@ public class PersonalDataDatabaseModel
 	}
 
 	public PersonalDataDatabaseModel(Guid id, Guid userId, string firstName, string lastName, string country,
-		string city, string iv)
+		string city, string iv, PersonalDataStatus status)
 	{
 		Id = id;
 		UserId = userId;
@@ -32,6 +33,7 @@ public class PersonalDataDatabaseModel
 		Country = country;
 		City = city;
 		Iv = iv;
+		Status = status;
 	}
 
 	public PersonalDataGrpcModel ToGrpcModel()
@@ -48,10 +50,17 @@ public class PersonalDataDatabaseModel
 	}
 }
 
+public enum PersonalDataStatus
+{
+	PendingApproval,
+	Approved,
+	Declined
+}
+
 public static class PersonalDataGrpcRequestExtensions
 {
 	public static PersonalDataDatabaseModel ToPersonalDataDatabaseModel(this ApplyPersonalDataGrpcRequest request,
-		string iv)
+		string iv, PersonalDataStatus status)
 	{
 		return new PersonalDataDatabaseModel(
 			Guid.NewGuid(),
@@ -60,7 +69,8 @@ public static class PersonalDataGrpcRequestExtensions
 			request.PersonalData.LastName,
 			request.PersonalData.Country,
 			request.PersonalData.City,
-			iv
+			iv,
+			status
 		);
 	}
 }

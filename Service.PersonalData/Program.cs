@@ -32,6 +32,7 @@ Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingApp(app);
 Chassis.Grpc.StartupUtils.ConfigureFluentMigratorApp(app);
 
 app.MapGrpcService<PersonalDataGrpcService>();
+app.MapGrpcService<KycScanGrpcService>();
 app.Run();
 
 void BindSystemServices(IServiceCollection services)

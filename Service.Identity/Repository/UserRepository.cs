@@ -3,6 +3,7 @@ using Dapper;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
 using Service.Identity.Scheme;
+using Shared.Abstractions;
 
 namespace Service.Identity.Repository;
 

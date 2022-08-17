@@ -5,8 +5,8 @@ using Gateway.Root.Identity.Application;
 using Gateway.Root.PersonalData.Application;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Abstractions.Grpc.Identity;
-using Shared.Abstractions.Grpc.PersonalData;
+using Shared.Grpc.Identity;
+using Shared.Grpc.PersonalData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,14 +24,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-builder.Services.AddScoped(provider =>
-{
-	var domain = EnvironmentUtils.GetRequiredEnvironmentVariable("DOMAIN");
-
-	return new UserResetService(domain, provider.GetRequiredService<LinkGenerator>());
-});
-builder.Services.AddScoped<PersonalDataService>();
-
+BindAppServices(builder.Services);
 BindGrpcServices(builder);
 
 var app = builder.Build();
@@ -47,6 +40,7 @@ else
 }
 
 app.UseMiddleware<JwtAuthenticationMiddleware>();
+app.UseMiddleware<AdminPermissionRequiredMiddleware>();
 
 app.UseAuthorization();
 
@@ -60,4 +54,15 @@ void BindGrpcServices(WebApplicationBuilder weBuilder)
 
 	weBuilder.Services.AddGrpcService<IIdentityGrpcService>(identityGrpc);
 	weBuilder.Services.AddGrpcService<IPersonalDataGrpcService>(personalDataGrpc);
+	weBuilder.Services.AddGrpcService<IKycScanGrpcService>(personalDataGrpc);
+}
+
+void BindAppServices(IServiceCollection services)
+{
+	var domain = EnvironmentUtils.GetRequiredEnvironmentVariable("DOMAIN");
+
+	services.AddScoped(provider => new KycScanLinkBuilder(domain, provider.GetRequiredService<LinkGenerator>()));
+	services.AddScoped(provider => new UserResetService(domain, provider.GetRequiredService<LinkGenerator>()));
+	services.AddScoped<PersonalDataService>();
+	services.AddScoped<PersonalDataManagementService>();
 }

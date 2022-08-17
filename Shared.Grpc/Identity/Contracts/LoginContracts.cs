@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
-using Shared.Abstractions.Grpc.Identity.Models;
+using Shared.Grpc.Identity.Models;
 
-namespace Shared.Abstractions.Grpc.Identity.Contracts;
+namespace Shared.Grpc.Identity.Contracts;
 
 [DataContract]
 public class LoginGrpcRequest

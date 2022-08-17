@@ -1,11 +1,14 @@
+using System.Runtime.Serialization;
+
 namespace Gateway.Root.Shared;
 
+[DataContract]
 public class ValidationErrorResponse
 {
-    public Dictionary<string, List<string>> Errors { get; }
+	[DataMember] public Dictionary<string, List<string>> Errors { get; }
 
-    public ValidationErrorResponse(Dictionary<string, List<string>> errors)
-    {
-        Errors = errors;
-    }
+	public ValidationErrorResponse(Dictionary<string, List<string>> errors)
+	{
+		Errors = errors;
+	}
 }

@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using Service.Identity.Models;
 
 namespace Service.Identity.Services;
 
@@ -15,7 +16,7 @@ public class TokenAuthService
 		_expirationMinutes = expirationMinutes;
 	}
 
-	public string GenerateToken(Guid id, string email)
+	public string GenerateToken(UserDatabaseModel user)
 	{
 		var key = Convert.FromBase64String(_secret);
 		var securityKey = new SymmetricSecurityKey(key);
@@ -23,8 +24,9 @@ public class TokenAuthService
 		{
 			Subject = new ClaimsIdentity(new[]
 			{
-				new Claim(ClaimTypes.PrimarySid, id.ToString()),
-				new Claim(ClaimTypes.Email, email),
+				new Claim(ClaimTypes.PrimarySid, user.Id.ToString()),
+				new Claim(ClaimTypes.Email, user.Email),
+				new Claim(ClaimTypes.Role, user.Status.ToString().ToLower()),
 			}),
 			Expires = DateTime.UtcNow.AddMinutes(_expirationMinutes),
 			SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)

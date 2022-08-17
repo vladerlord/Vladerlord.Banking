@@ -1,6 +1,7 @@
-using Shared.Abstractions.Grpc.Identity.Contracts;
-using Shared.Abstractions.Grpc.Identity.Models;
+using Shared.Abstractions;
 using Shared.Abstractions.MessageBus.Identity;
+using Shared.Grpc.Identity.Contracts;
+using Shared.Grpc.Identity.Models;
 
 namespace Service.Identity.Models;
 
@@ -43,14 +44,6 @@ public class UserDatabaseModel
 			ConfirmationLink = confirmationUrl
 		};
 	}
-}
-
-public enum UserStatus
-{
-	Created,
-	Confirmed,
-	Approved,
-	Admin
 }
 
 public static class RegisterGrpcRequestExtensions

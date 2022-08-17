@@ -1,4 +1,4 @@
-using Shared.Abstractions.Grpc;
+using Shared.Grpc;
 
 namespace Gateway.Root.PersonalData.Domain;
 

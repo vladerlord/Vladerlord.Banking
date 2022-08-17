@@ -13,7 +13,8 @@ public class CreateKycScansTable: Migration
             .WithColumn("file_name").AsGuid().NotNullable().PrimaryKey()
             .WithColumn("personal_data_id").AsGuid().ForeignKey(CreatePersonalDataTable.TableName, "id")
             .WithColumn("file_extension").AsString(10).NotNullable()
-            .WithColumn("original_name").AsString(255).NotNullable();
+            .WithColumn("original_name").AsString(255).NotNullable()
+            .WithColumn("content_type").AsString(50).NotNullable();
     }
 
     public override void Down()

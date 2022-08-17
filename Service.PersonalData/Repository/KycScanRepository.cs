@@ -22,8 +22,9 @@ public class KycScanRepository : IKycScanRepository
 	({KycScanDbSchema.Columns.PersonalDataId},
 	{KycScanDbSchema.Columns.FileName},
 	{KycScanDbSchema.Columns.FileExtension},
-	{KycScanDbSchema.Columns.OriginalName})
-	VALUES (@PersonalDataId, @FileName, @FileExtension, @OriginalName)";
+	{KycScanDbSchema.Columns.OriginalName},
+	{KycScanDbSchema.Columns.ContentType})
+	VALUES (@PersonalDataId, @FileName, @FileExtension, @OriginalName, @ContentType)";
 
 		using var connection = _dapperContext.CreateConnection();
 
@@ -42,6 +43,19 @@ public class KycScanRepository : IKycScanRepository
 		return await connection.QueryAsync<KycScanDatabaseModel>(sql, new
 		{
 			PersonalDataId = personalDataId
+		});
+	}
+
+	public async Task<KycScanDatabaseModel?> FindByIdAsync(Guid id)
+	{
+		var sql = $@"
+	SELECT * FROM {KycScanDbSchema.Table} WHERE {KycScanDbSchema.Columns.FileName} = @FileName";
+
+		using var connection = _dapperContext.CreateConnection();
+
+		return await connection.QuerySingleOrDefaultAsync<KycScanDatabaseModel>(sql, new
+		{
+			FileName = id
 		});
 	}
 

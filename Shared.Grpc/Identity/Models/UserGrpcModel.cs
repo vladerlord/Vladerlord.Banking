@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Shared.Abstractions.Grpc.Identity.Models;
+namespace Shared.Grpc.Identity.Models;
 
 [DataContract]
 public class UserGrpcModel

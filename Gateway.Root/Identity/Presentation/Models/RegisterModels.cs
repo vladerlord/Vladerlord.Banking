@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
-using Shared.Abstractions.Grpc;
-using Shared.Abstractions.Grpc.Identity.Contracts;
+using Shared.Grpc;
+using Shared.Grpc.Identity.Contracts;
 
 namespace Gateway.Root.Identity.Presentation.Models;
 

@@ -21,8 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Chassis.Grpc\Chassis.Grpc.csproj"/>
       <ProjectReference Include="..\Service.IdentityNotifier.RazorTemplates\Service.IdentityNotifier.RazorTemplates.csproj" />
-      <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Shared.Abstractions.Grpc;
+namespace Shared.Grpc;
 
 public enum GrpcResponseStatus
 {
@@ -8,7 +8,9 @@ public enum GrpcResponseStatus
 	Error,
 	NotFound,
 	UserAlreadyExist,
-	Invalid
+	Invalid,
+	AlreadyInProcess,
+	AlreadyApproved
 }
 
 public static class GrpcResponseStatusExtenstion

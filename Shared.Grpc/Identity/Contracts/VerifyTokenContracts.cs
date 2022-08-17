@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Shared.Abstractions.Grpc.Identity.Contracts;
+namespace Shared.Grpc.Identity.Contracts;
 
 [DataContract]
 public class VerifyTokenGrpcRequest

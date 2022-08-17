@@ -16,7 +16,8 @@ public class CreatePersonalDataTable: Migration
             .WithColumn("last_name").AsString(128).NotNullable()
             .WithColumn("country").AsString(128).NotNullable()
             .WithColumn("city").AsString(128).NotNullable()
-            .WithColumn("iv").AsString(24).NotNullable();
+            .WithColumn("iv").AsString(24).NotNullable()
+            .WithColumn("status").AsInt32().NotNullable();
     }
 
     public override void Down()

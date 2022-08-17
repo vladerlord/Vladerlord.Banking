@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.Features;
-using Shared.Abstractions.Grpc;
-using Shared.Abstractions.Grpc.Identity;
-using Shared.Abstractions.Grpc.Identity.Contracts;
+using Shared.Grpc;
+using Shared.Grpc.Identity;
+using Shared.Grpc.Identity.Contracts;
 
 namespace Gateway.Root.Shared;
 
