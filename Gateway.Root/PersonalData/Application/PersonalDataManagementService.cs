@@ -1,5 +1,5 @@
 using Gateway.Root.PersonalData.Domain;
-using Shared.Grpc;
+using Gateway.Root.Shared;
 using Shared.Grpc.PersonalData;
 using Shared.Grpc.PersonalData.Contracts;
 
@@ -7,58 +7,57 @@ namespace Gateway.Root.PersonalData.Application;
 
 public class PersonalDataManagementService
 {
-	private readonly IPersonalDataGrpcService _personalDataGrpcService;
-	private readonly KycScanLinkBuilder _kycScanLinkBuilder;
+    private readonly IPersonalDataGrpcService _personalDataGrpcService;
 
-	public PersonalDataManagementService(IPersonalDataGrpcService personalDataGrpcService,
-		KycScanLinkBuilder kycScanLinkBuilder)
-	{
-		_personalDataGrpcService = personalDataGrpcService;
-		_kycScanLinkBuilder = kycScanLinkBuilder;
-	}
+    public PersonalDataManagementService(IPersonalDataGrpcService personalDataGrpcService)
+    {
+        _personalDataGrpcService = personalDataGrpcService;
+    }
 
-	public async Task<ListAllUnapprovedResponse> ListAllUnapproved()
-	{
-		var result = await _personalDataGrpcService.ListAllUnapprovedPersonalDataAsync();
-		var dtoList = result.PersonalDataList
-			.Select(personalDataGrpcModel => personalDataGrpcModel.ToDto())
-			.ToList();
+    public async Task<GrpcAppResponse<IEnumerable<PersonalDataDto>>> ListAllUnapproved()
+    {
+        var grpcResponse = await _personalDataGrpcService.ListAllUnapprovedPersonalDataAsync();
+        var dtoList = grpcResponse.PersonalDataList
+            .Select(personalDataGrpcModel => personalDataGrpcModel.ToDto())
+            .ToList();
 
-		return new ListAllUnapprovedResponse(result.Status, dtoList);
-	}
+        return new GrpcAppResponse<IEnumerable<PersonalDataDto>>
+        {
+            GrpcStatus = grpcResponse.GrpcResponse,
+            Content = dtoList
+        };
+    }
 
-	public async Task<GetPersonalDataByIdResponse> GetPersonalDataById(Guid personalDataId)
-	{
-		var grpcResponse =
-			await _personalDataGrpcService.GetByIdAsync(new GetPersonalDataByIdGrpcRequest(personalDataId));
+    public async Task<GrpcAppResponse<PersonalDataDto?>> GetPersonalDataById(Guid personalDataId)
+    {
+        var grpcRequest = new GetPersonalDataByIdGrpcRequest { PersonalDataId = personalDataId };
 
-		var kycScansLinks = (from kycScanId in grpcResponse.KycScansIds
-			select _kycScanLinkBuilder.BuildLinkToKycScan(kycScanId)).ToList();
+        var grpcResponse = await _personalDataGrpcService.GetByIdAsync(grpcRequest);
 
-		return new GetPersonalDataByIdResponse(
-			grpcResponse.GrpcResponse.Status,
-			grpcResponse.PersonalData?.ToDto(),
-			kycScansLinks
-		);
-	}
+        return new GrpcAppResponse<PersonalDataDto?>
+        {
+            GrpcStatus = grpcResponse.GrpcResponse,
+            Content = grpcResponse.PersonalData?.ToDto(grpcResponse.KycScansIds)
+        };
+    }
 
-	public async Task<GrpcResponseStatus> ApproveAsync(Guid personalData)
-	{
-		var result = await _personalDataGrpcService.ApprovePersonalDataAsync(new ApprovePersonalDataGrpcRequest
-		{
-			PersonalDataId = personalData
-		});
+    public async Task<GrpcAppResponse> ApproveAsync(Guid personalData)
+    {
+        var result = await _personalDataGrpcService.ApprovePersonalDataAsync(new ApprovePersonalDataGrpcRequest
+        {
+            PersonalDataId = personalData
+        });
 
-		return result.GrpcResponse.Status;
-	}
+        return new GrpcAppResponse { GrpcStatus = result.GrpcResponse };
+    }
 
-	public async Task<GrpcResponseStatus> DeclineAsync(Guid personalData)
-	{
-		var result = await _personalDataGrpcService.DeclinePersonalDataAsync(new DeclinePersonalDataGrpcRequest
-		{
-			PersonalDataId = personalData
-		});
+    public async Task<GrpcAppResponse> DeclineAsync(Guid personalData)
+    {
+        var result = await _personalDataGrpcService.DeclinePersonalDataAsync(new DeclinePersonalDataGrpcRequest
+        {
+            PersonalDataId = personalData
+        });
 
-		return result.GrpcResponse.Status;
-	}
+        return new GrpcAppResponse { GrpcStatus = result.GrpcResponse };
+    }
 }

@@ -7,82 +7,82 @@ namespace Service.PersonalData.Services;
 
 public class KycScansService
 {
-	private readonly KycScansFileService _kycScansFileService;
-	private readonly IKycScanRepository _kycScanRepository;
-	private readonly KycScanEncryptionService _kycScanEncryptionService;
+    private readonly KycScansFileService _kycScansFileService;
+    private readonly IKycScanRepository _kycScanRepository;
+    private readonly KycScanEncryptionService _kycScanEncryptionService;
 
-	public KycScansService(
-		KycScansFileService kycScansFileService,
-		IKycScanRepository kycScanRepository,
-		KycScanEncryptionService kycScanEncryptionService
-	)
-	{
-		_kycScansFileService = kycScansFileService;
-		_kycScanRepository = kycScanRepository;
+    public KycScansService(
+        KycScansFileService kycScansFileService,
+        IKycScanRepository kycScanRepository,
+        KycScanEncryptionService kycScanEncryptionService
+    )
+    {
+        _kycScansFileService = kycScansFileService;
+        _kycScanRepository = kycScanRepository;
 
-		_kycScanEncryptionService = kycScanEncryptionService;
-	}
+        _kycScanEncryptionService = kycScanEncryptionService;
+    }
 
-	public async Task Create(List<KycScanCreateGrpcModel> kycScans, PersonalDataDatabaseModel personalData)
-	{
-		foreach (var kycScanCreateModel in kycScans)
-		{
-			var kycScanDatabaseModel = kycScanCreateModel.ToDatabaseModel(personalData.Id);
+    public async Task Create(List<KycScanCreateGrpcModel> kycScans, PersonalDataDatabaseModel personalData)
+    {
+        foreach (var kycScanCreateModel in kycScans)
+        {
+            var kycScanDatabaseModel = kycScanCreateModel.ToDatabaseModel(personalData.Id);
 
-			_kycScanEncryptionService.EncryptCreateGrpcModel(kycScanCreateModel, personalData.Iv);
+            _kycScanEncryptionService.EncryptCreateGrpcModel(kycScanCreateModel, personalData.Iv);
 
-			await _kycScansFileService.SaveKycScan(kycScanCreateModel, kycScanDatabaseModel.FileName.ToString());
-			await _kycScanRepository.CreateAsync(kycScanDatabaseModel);
-		}
-	}
+            await _kycScansFileService.SaveKycScan(kycScanCreateModel, kycScanDatabaseModel.FileName.ToString());
+            await _kycScanRepository.CreateAsync(kycScanDatabaseModel);
+        }
+    }
 
-	public async Task DeleteAllByPersonalDataId(Guid personalDataId)
-	{
-		var kycScans = await _kycScanRepository.GetByPersonalDataIdAsync(personalDataId);
+    public async Task DeleteAllByPersonalDataId(Guid personalDataId)
+    {
+        var kycScans = await _kycScanRepository.GetByPersonalDataIdAsync(personalDataId);
 
-		foreach (var kycScanDatabaseModel in kycScans)
-			_kycScansFileService.DeleteKycScan(kycScanDatabaseModel);
+        foreach (var kycScanDatabaseModel in kycScans)
+            _kycScansFileService.DeleteKycScan(kycScanDatabaseModel);
 
-		await _kycScanRepository.DeleteByPersonalDataIdAsync(personalDataId);
-	}
+        await _kycScanRepository.DeleteByPersonalDataIdAsync(personalDataId);
+    }
 
-	public async Task<KycScanGrpcModel?> FindById(Guid id)
-	{
-		var kycScan = await _kycScanRepository.FindByIdAsync(id);
+    public async Task<KycScanGrpcModel?> FindById(Guid id)
+    {
+        var kycScan = await _kycScanRepository.FindByIdAsync(id);
 
-		if (kycScan == null)
-			return null;
+        if (kycScan == null)
+            return null;
 
-		var content = await _kycScansFileService.GetKyсScanContentAsync(kycScan);
-		var result = kycScan.ToGrpcModel(content);
+        var content = await _kycScansFileService.GetKyсScanContentAsync(kycScan);
+        var result = kycScan.ToGrpcModel(content);
 
-		try
-		{
-			await _kycScanEncryptionService.DecryptGrpcModel(result);
-		}
-		catch (PersonalDataNotFoundException)
-		{
-			return null;
-		}
+        try
+        {
+            await _kycScanEncryptionService.DecryptGrpcModel(result);
+        }
+        catch (PersonalDataNotFoundException)
+        {
+            return null;
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public async Task<IEnumerable<KycScanGrpcModel>> GetAllByPersonalData(PersonalDataDatabaseModel personalData)
-	{
-		var kycScans = await _kycScanRepository.GetByPersonalDataIdAsync(personalData.Id);
-		var result = new List<KycScanGrpcModel>();
+    public async Task<IEnumerable<KycScanGrpcModel>> GetAllByPersonalData(PersonalDataDatabaseModel personalData)
+    {
+        var kycScans = await _kycScanRepository.GetByPersonalDataIdAsync(personalData.Id);
+        var result = new List<KycScanGrpcModel>();
 
-		foreach (var kycScanDatabaseModel in kycScans)
-		{
-			var content = await _kycScansFileService.GetKyсScanContentAsync(kycScanDatabaseModel);
-			var grpcModel = kycScanDatabaseModel.ToGrpcModel(content);
+        foreach (var kycScanDatabaseModel in kycScans)
+        {
+            var content = await _kycScansFileService.GetKyсScanContentAsync(kycScanDatabaseModel);
+            var grpcModel = kycScanDatabaseModel.ToGrpcModel(content);
 
-			_kycScanEncryptionService.DecryptGrpcModel(grpcModel, personalData.Iv);
+            _kycScanEncryptionService.DecryptGrpcModel(grpcModel, personalData.Iv);
 
-			result.Add(grpcModel);
-		}
+            result.Add(grpcModel);
+        }
 
-		return result;
-	}
+        return result;
+    }
 }

@@ -9,37 +9,37 @@ using Service.IdentityNotifier.Subscribers;
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 if (environment == null)
-	throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
+    throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
 
 var isDevelopment = environment.ToLower().Equals("development");
 
 if (isDevelopment)
-	SetEnvironmentVariablesFromUserSecrets();
+    SetEnvironmentVariablesFromUserSecrets();
 
 var builder = Host.CreateDefaultBuilder(args)
-	.UseSerilog((_, log) =>
-	{
-		log.Enrich.FromLogContext()
-			.Enrich.WithMachineName()
-			.Enrich.WithProperty("Environment", environment)
-			.Filter.ByExcluding(c =>
-				c.Properties.Any(p =>
-				{
-					var (_, value) = p;
-					return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
-				}))
-			.WriteTo.Console();
+    .UseSerilog((_, log) =>
+    {
+        log.Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithProperty("Environment", environment)
+            .Filter.ByExcluding(c =>
+                c.Properties.Any(p =>
+                {
+                    var (_, value) = p;
+                    return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
+                }))
+            .WriteTo.Console();
 
-		if (isDevelopment)
-			log.MinimumLevel.Debug();
-	})
-	.ConfigureServices(services =>
-	{
-		ConfigureSmtp(services);
-		ConfigureMasstransit(services);
+        if (isDevelopment)
+            log.MinimumLevel.Debug();
+    })
+    .ConfigureServices(services =>
+    {
+        ConfigureSmtp(services);
+        ConfigureMasstransit(services);
 
-		services.AddSingleton<RazorTemplateRenderer>();
-	});
+        services.AddSingleton<RazorTemplateRenderer>();
+    });
 
 var app = builder.Build();
 
@@ -47,50 +47,50 @@ await app.RunAsync();
 
 void ConfigureSmtp(IServiceCollection services)
 {
-	var smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST");
-	var smtpPort = Environment.GetEnvironmentVariable("SMTP_PORT");
-	var smtpUsername = Environment.GetEnvironmentVariable("SMTP_USERNAME");
-	var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
-	var smtpFrom = Environment.GetEnvironmentVariable("SMTP_FROM");
+    var smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST");
+    var smtpPort = Environment.GetEnvironmentVariable("SMTP_PORT");
+    var smtpUsername = Environment.GetEnvironmentVariable("SMTP_USERNAME");
+    var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+    var smtpFrom = Environment.GetEnvironmentVariable("SMTP_FROM");
 
-	if (smtpHost == null || smtpPort == null || smtpUsername == null || smtpPassword == null || smtpFrom == null)
-		throw new Exception("env SMTP_HOST/SMTP_PORT/SMTP_USERNAME/SMTP_PASSWORD/SMTP_FROM is not set");
+    if (smtpHost == null || smtpPort == null || smtpUsername == null || smtpPassword == null || smtpFrom == null)
+        throw new Exception("env SMTP_HOST/SMTP_PORT/SMTP_USERNAME/SMTP_PASSWORD/SMTP_FROM is not set");
 
-	services.AddSingleton<IMailSender>(new MailSenderService(smtpHost, int.Parse(smtpPort), smtpUsername, smtpPassword,
-		smtpFrom));
+    services.AddSingleton<IMailSender>(new MailSenderService(smtpHost, int.Parse(smtpPort), smtpUsername, smtpPassword,
+        smtpFrom));
 }
 
 void ConfigureMasstransit(IServiceCollection services)
 {
-	services.AddMassTransit(bus =>
-	{
-		bus.AddConsumer<UserCreatedEventSubscriber>(typeof(UserCreatedEventSubscriberDefinition));
+    services.AddMassTransit(bus =>
+    {
+        bus.AddConsumer<UserCreatedEventSubscriber>(typeof(UserCreatedEventSubscriberDefinition));
 
-		bus.SetEndpointNameFormatter(new SnakeCaseEndpointNameFormatter(false));
-		bus.UsingRabbitMq((context, config) =>
-		{
-			var hostUri = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
-			var user = Environment.GetEnvironmentVariable("RABBITMQ_USER");
-			var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+        bus.SetEndpointNameFormatter(new SnakeCaseEndpointNameFormatter(false));
+        bus.UsingRabbitMq((context, config) =>
+        {
+            var hostUri = Environment.GetEnvironmentVariable("RABBITMQ_HOST");
+            var user = Environment.GetEnvironmentVariable("RABBITMQ_USER");
+            var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
 
-			if (hostUri == null || user == null || password == null)
-				throw new Exception($"env RABBITMQ_HOST/RABBITMQ_USER/RABBITMQ_PASSWORD is not set");
+            if (hostUri == null || user == null || password == null)
+                throw new Exception($"env RABBITMQ_HOST/RABBITMQ_USER/RABBITMQ_PASSWORD is not set");
 
-			config.Host(hostUri, "/", h =>
-			{
-				h.Username(user);
-				h.Password(password);
-			});
+            config.Host(hostUri, "/", h =>
+            {
+                h.Username(user);
+                h.Password(password);
+            });
 
-			config.ConfigureEndpoints(context);
-		});
-	});
+            config.ConfigureEndpoints(context);
+        });
+    });
 }
 
 void SetEnvironmentVariablesFromUserSecrets()
 {
-	var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+    var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
 
-	foreach (var child in config.GetChildren())
-		Environment.SetEnvironmentVariable(child.Key, child.Value);
+    foreach (var child in config.GetChildren())
+        Environment.SetEnvironmentVariable(child.Key, child.Value);
 }

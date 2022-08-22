@@ -12,118 +12,125 @@ namespace Service.Identity;
 
 public class IdentityGrpcService : IIdentityGrpcService
 {
-	private readonly IUserRepository _userRepository;
-	private readonly IConfirmationLinkRepository _confirmationLinkRepository;
-	private readonly TokenAuthService _tokenAuthService;
-	private readonly IPublishEndpoint _publishEndpoint;
-	private readonly HashService _hashService;
+    private readonly IUserRepository _userRepository;
+    private readonly IConfirmationLinkRepository _confirmationLinkRepository;
+    private readonly TokenAuthService _tokenAuthService;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly HashService _hashService;
 
-	public IdentityGrpcService(IUserRepository userRepository,
-		IConfirmationLinkRepository confirmationLinkRepository,
-		TokenAuthService tokenAuthService,
-		IPublishEndpoint publishEndpoint,
-		HashService hashService)
-	{
-		_userRepository = userRepository;
-		_confirmationLinkRepository = confirmationLinkRepository;
-		_tokenAuthService = tokenAuthService;
-		_publishEndpoint = publishEndpoint;
-		_hashService = hashService;
-	}
+    public IdentityGrpcService(IUserRepository userRepository,
+        IConfirmationLinkRepository confirmationLinkRepository,
+        TokenAuthService tokenAuthService,
+        IPublishEndpoint publishEndpoint,
+        HashService hashService)
+    {
+        _userRepository = userRepository;
+        _confirmationLinkRepository = confirmationLinkRepository;
+        _tokenAuthService = tokenAuthService;
+        _publishEndpoint = publishEndpoint;
+        _hashService = hashService;
+    }
 
-	public async Task<LoginGrpcResponse> LoginAsync(LoginGrpcRequest request)
-	{
-		var user = await _userRepository.FindByEmailAsync(request.Email);
+    public async Task<LoginGrpcResponse> LoginAsync(LoginGrpcRequest request)
+    {
+        var user = await _userRepository.FindByEmailAsync(request.Email);
 
-		if (user == null)
-			return new LoginGrpcResponse { Status = GrpcResponseStatus.NotFound };
+        if (user == null)
+            return new LoginGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
+            };
 
-		var isPasswordCorrect = _hashService.VerifyHash(request.Password, user.Password);
+        var isPasswordCorrect = _hashService.VerifyHash(request.Password, user.Password);
 
-		if (!isPasswordCorrect)
-			return new LoginGrpcResponse { Status = GrpcResponseStatus.NotFound };
+        if (!isPasswordCorrect)
+            return new LoginGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
+            };
 
-		return new LoginGrpcResponse
-		{
-			Status = GrpcResponseStatus.Ok,
-			Jwt = _tokenAuthService.GenerateToken(user)
-		};
-	}
+        return new LoginGrpcResponse
+        {
+            GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
+            Jwt = _tokenAuthService.GenerateToken(user),
+            UserModel = user.ToGrpcModel()
+        };
+    }
 
-	public async Task<RegisterUserGrpcResponse> RegisterAsync(RegisterUserGrpcRequest request)
-	{
-		UserDatabaseModel? user = null;
-		var status = GrpcResponseStatus.Ok;
+    public async Task<RegisterUserGrpcResponse> RegisterAsync(RegisterUserGrpcRequest request)
+    {
+        UserDatabaseModel? user = null;
+        var status = GrpcResponseStatus.Ok;
 
-		try
-		{
-			var hashedPassword = _hashService.Hash(request.Password);
+        try
+        {
+            var hashedPassword = _hashService.Hash(request.Password);
 
-			user = await _userRepository.CreateAsync(request.ToDatabaseModel(hashedPassword, UserStatus.Created));
+            user = await _userRepository.CreateAsync(request.ToDatabaseModel(hashedPassword, UserStatus.Created));
 
-			await _confirmationLinkRepository.CreateAsync(new ConfirmationLinkDatabaseModel
-			(
-				Guid.NewGuid(),
-				ConfirmationLinkType.RegistrationConfirmation,
-				request.ConfirmationCode,
-				user.Id
-			));
+            await _confirmationLinkRepository.CreateAsync(new ConfirmationLinkDatabaseModel
+            (
+                Guid.NewGuid(),
+                ConfirmationLinkType.RegistrationConfirmation,
+                request.ConfirmationCode,
+                user.Id
+            ));
 
-			await _publishEndpoint.Publish(user.ToCreatedEvent(request.RegisterConfirmationUrl));
-		}
-		catch (PostgresException e)
-		{
-			// todo, check that field is email
-			status = e.SqlState == PostgresErrorCodes.UniqueViolation
-				? GrpcResponseStatus.UserAlreadyExist
-				: GrpcResponseStatus.Error;
-		}
-		catch (Exception)
-		{
-			status = GrpcResponseStatus.Error;
-		}
+            await _publishEndpoint.Publish(user.ToCreatedEvent(request.RegisterConfirmationUrl));
+        }
+        catch (PostgresException e)
+        {
+            // todo, check that field is email
+            status = e.SqlState == PostgresErrorCodes.UniqueViolation
+                ? GrpcResponseStatus.UserAlreadyExist
+                : GrpcResponseStatus.Error;
+        }
+        catch (Exception)
+        {
+            status = GrpcResponseStatus.Error;
+        }
 
-		return new RegisterUserGrpcResponse
-		{
-			Status = status,
-			UserModel = user?.ToGrpcModel()
-		};
-	}
+        return new RegisterUserGrpcResponse
+        {
+            GrpcResponse = new GrpcResponse { Status = status },
+            UserModel = user?.ToGrpcModel()
+        };
+    }
 
-	public Task<VerifyTokenGrpcResponse> VerifyTokenAsync(VerifyTokenGrpcRequest request)
-	{
-		var result = _tokenAuthService.VerifyToken(request.JwtToken);
+    public Task<VerifyTokenGrpcResponse> VerifyTokenAsync(VerifyTokenGrpcRequest request)
+    {
+        var result = _tokenAuthService.VerifyToken(request.JwtToken);
 
-		var claims = result?.Claims
-			.Select(resultClaim => new KeyValuePair<string, string>(resultClaim.Type, resultClaim.Value))
-			.ToList();
+        var claims = result?.Claims
+            .Select(resultClaim => new KeyValuePair<string, string>(resultClaim.Type, resultClaim.Value))
+            .ToList();
 
-		return Task.FromResult(new VerifyTokenGrpcResponse
-		{
-			Status = result != null ? GrpcResponseStatus.Ok : GrpcResponseStatus.Invalid,
-			Claims = claims
-		});
-	}
+        return Task.FromResult(new VerifyTokenGrpcResponse
+        {
+            Status = result != null ? GrpcResponseStatus.Ok : GrpcResponseStatus.Invalid,
+            Claims = claims
+        });
+    }
 
-	public async Task<RegisterConfirmationGrpcResponse> RegisterConfirmationAsync(
-		RegisterConfirmationGrpcRequest request)
-	{
-		var confirmationLink = await _confirmationLinkRepository.FindByConfirmationCodeAsync(request.ConfirmationCode);
+    public async Task<RegisterConfirmationGrpcResponse> RegisterConfirmationAsync(
+        RegisterConfirmationGrpcRequest request)
+    {
+        var confirmationLink = await _confirmationLinkRepository.FindByConfirmationCodeAsync(request.ConfirmationCode);
 
-		if (confirmationLink == null)
-			return new RegisterConfirmationGrpcResponse { Status = GrpcResponseStatus.NotFound };
+        if (confirmationLink == null)
+            return new RegisterConfirmationGrpcResponse { Status = GrpcResponseStatus.NotFound };
 
-		var user = await _userRepository.FindByIdAsync(confirmationLink.UserId);
+        var user = await _userRepository.FindByIdAsync(confirmationLink.UserId);
 
-		if (user == null)
-			return new RegisterConfirmationGrpcResponse { Status = GrpcResponseStatus.NotFound };
+        if (user == null)
+            return new RegisterConfirmationGrpcResponse { Status = GrpcResponseStatus.NotFound };
 
-		await _userRepository.UpdateStatusAsync(user.Id, UserStatus.Confirmed);
-		await _confirmationLinkRepository.DeleteByIdAsync(confirmationLink.Id);
+        await _userRepository.UpdateStatusAsync(user.Id, UserStatus.Confirmed);
+        await _confirmationLinkRepository.DeleteByIdAsync(confirmationLink.Id);
 
-		return new RegisterConfirmationGrpcResponse
-		{
-			Status = GrpcResponseStatus.Ok
-		};
-	}
+        return new RegisterConfirmationGrpcResponse
+        {
+            Status = GrpcResponseStatus.Ok
+        };
+    }
 }

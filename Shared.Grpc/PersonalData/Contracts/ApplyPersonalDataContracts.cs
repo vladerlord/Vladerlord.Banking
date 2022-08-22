@@ -6,25 +6,24 @@ namespace Shared.Grpc.PersonalData.Contracts;
 [DataContract]
 public class ApplyPersonalDataGrpcRequest
 {
-	public ApplyPersonalDataGrpcRequest()
-	{
-		PersonalData = new PersonalDataCreateGrpcModel();
-		KycScans = new List<KycScanCreateGrpcModel>();
-	}
+    [DataMember(Order = 1)] public PersonalDataCreateGrpcModel PersonalData { get; init; }
+    [DataMember(Order = 2)] public List<KycScanCreateGrpcModel> KycScans { get; init; }
 
-	public ApplyPersonalDataGrpcRequest(PersonalDataCreateGrpcModel personalData, List<KycScanCreateGrpcModel> kycScans)
-	{
-		PersonalData = personalData;
-		KycScans = kycScans;
-	}
-
-	[DataMember(Order = 1)] public PersonalDataCreateGrpcModel PersonalData { get; set; }
-	[DataMember(Order = 2)] public List<KycScanCreateGrpcModel> KycScans { get; set; }
+    public ApplyPersonalDataGrpcRequest()
+    {
+        PersonalData = new PersonalDataCreateGrpcModel();
+        KycScans = new List<KycScanCreateGrpcModel>();
+    }
 }
 
 [DataContract]
 public class ApplyPersonalDataGrpcResponse
 {
-	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
-	[DataMember(Order = 2)] public PersonalDataGrpcModel? PersonalData { get; set; }
+    [DataMember(Order = 1)] public GrpcResponse GrpcResponse { get; init; }
+    [DataMember(Order = 2)] public PersonalDataGrpcModel? PersonalData { get; init; }
+
+    public ApplyPersonalDataGrpcResponse()
+    {
+        GrpcResponse = new GrpcResponse();
+    }
 }

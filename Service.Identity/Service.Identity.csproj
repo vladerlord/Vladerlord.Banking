@@ -17,8 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Chassis.Grpc\Chassis.Grpc.csproj" />
-      <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj" />
+        <ProjectReference Include="..\Chassis.Grpc\Chassis.Grpc.csproj"/>
+        <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj"/>
     </ItemGroup>
 
 </Project>

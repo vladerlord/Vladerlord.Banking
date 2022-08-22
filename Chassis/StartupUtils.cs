@@ -1,35 +1,34 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 
 namespace Chassis;
 
 public static class StartupUtils
 {
-	public static void ConfigureLogging(WebApplicationBuilder builder)
-	{
-		var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    public static void ConfigureLogging(WebApplicationBuilder builder, LogEventLevel level = LogEventLevel.Information)
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-		if (environment == null)
-			throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
+        if (environment == null)
+            throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
 
-		var config = new LoggerConfiguration()
-			.Enrich.FromLogContext()
-			.Enrich.WithMachineName()
-			.Enrich.WithProperty("Environment", environment)
-			.Filter.ByExcluding(c =>
-				c.Properties.Any(p =>
-				{
-					var (_, value) = p;
-					return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
-				}))
-			.WriteTo.Console();
+        var config = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithProperty("Environment", environment)
+            .Filter.ByExcluding(c =>
+                c.Properties.Any(p =>
+                {
+                    var (_, value) = p;
+                    return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
+                }))
+            .WriteTo.Console();
 
-		if (builder.Environment.IsDevelopment())
-			config.MinimumLevel.Debug();
+        config.MinimumLevel.Is(level);
 
-		Log.Logger = config.CreateLogger();
+        Log.Logger = config.CreateLogger();
 
-		builder.Host.UseSerilog();
-	}
+        builder.Host.UseSerilog();
+    }
 }

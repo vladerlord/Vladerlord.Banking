@@ -1,42 +1,24 @@
 using System.Runtime.Serialization;
-using Shared.Grpc;
-using Shared.Grpc.Identity.Contracts;
+using Gateway.Root.Identity.Domain;
+using Gateway.Root.Shared;
 
 namespace Gateway.Root.Identity.Presentation.Models;
 
 [DataContract]
 public class RegisterUserHttpRequest
 {
-	[DataMember] public string Email { get; }
-	[DataMember] public string Password { get; }
+    [DataMember] public string Email { get; init; }
+    [DataMember] public string Password { get; init; }
 
-	public RegisterUserHttpRequest(string email, string password)
-	{
-		Email = email;
-		Password = password;
-	}
-
-	public RegisterUserGrpcRequest ToGrpcRequest(string confirmationCode, string confirmationUrl)
-	{
-		return new RegisterUserGrpcRequest
-		{
-			Email = Email,
-			Password = Password,
-			ConfirmationCode = confirmationCode,
-			RegisterConfirmationUrl = confirmationUrl
-		};
-	}
+    public RegisterUserHttpRequest()
+    {
+        Email = string.Empty;
+        Password = string.Empty;
+    }
 }
 
 [DataContract]
-public class RegisterUserHttpResponse
+public class RegisterUserHttpResponse : GatewayHttpResponse
 {
-	[DataMember] public string Status { get; }
-	[DataMember] public int StatusCode { get; }
-
-	public RegisterUserHttpResponse(GrpcResponseStatus status)
-	{
-		Status = status.ToString();
-		StatusCode = status.ToHttpCode();
-	}
+    [DataMember] public UserDto? User { get; init; }
 }

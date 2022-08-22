@@ -11,18 +11,12 @@ public class ListAllUnapprovedPersonalDataGrpcRequest
 [DataContract]
 public class ListAllUnapprovedPersonalDataGrpcResponse
 {
-	public ListAllUnapprovedPersonalDataGrpcResponse()
-	{
-		PersonalDataList = new List<PersonalDataGrpcModel>();
-	}
+    [DataMember(Order = 1)] public GrpcResponse GrpcResponse { get; set; }
+    [DataMember(Order = 2)] public List<PersonalDataGrpcModel> PersonalDataList { get; set; }
 
-	public ListAllUnapprovedPersonalDataGrpcResponse(GrpcResponseStatus status,
-		List<PersonalDataGrpcModel> personalDataList)
-	{
-		Status = status;
-		PersonalDataList = personalDataList;
-	}
-
-	[DataMember(Order = 1)] public GrpcResponseStatus Status { get; set; }
-	[DataMember(Order = 2)] public List<PersonalDataGrpcModel> PersonalDataList { get; set; }
+    public ListAllUnapprovedPersonalDataGrpcResponse()
+    {
+        GrpcResponse = new GrpcResponse();
+        PersonalDataList = new List<PersonalDataGrpcModel>();
+    }
 }

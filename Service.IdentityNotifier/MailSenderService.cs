@@ -34,7 +34,7 @@ public class MailSenderService : IMailSender
             From = new MailAddress(_from),
             Subject = subject,
             IsBodyHtml = true,
-            Body = body,
+            Body = body
         };
         message.To.Add(to);
 

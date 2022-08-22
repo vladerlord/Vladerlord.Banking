@@ -6,35 +6,38 @@ namespace Gateway.Root.PersonalData.Domain;
 [DataContract]
 public class PersonalDataDto
 {
-	[DataMember] public Guid Id { get; }
-	[DataMember] public Guid UserId { get; }
-	[DataMember] public string FirstName { get; }
-	[DataMember] public string LastName { get; }
-	[DataMember] public string Country { get; }
-	[DataMember] public string City { get; }
+    [DataMember] public Guid Id { get; init; }
+    [DataMember] public Guid UserId { get; init; }
+    [DataMember] public string FirstName { get; init; }
+    [DataMember] public string LastName { get; init; }
+    [DataMember] public string Country { get; init; }
+    [DataMember] public string City { get; init; }
 
-	public PersonalDataDto(Guid id, Guid userId, string firstName, string lastName, string country, string city)
-	{
-		Id = id;
-		UserId = userId;
-		FirstName = firstName;
-		LastName = lastName;
-		Country = country;
-		City = city;
-	}
+    [DataMember] public List<Guid> KycScansIds { get; init; }
+
+    public PersonalDataDto()
+    {
+        FirstName = string.Empty;
+        LastName = string.Empty;
+        Country = string.Empty;
+        City = string.Empty;
+        KycScansIds = new List<Guid>();
+    }
 }
 
 public static class PersonalDataDtoExtensions
 {
-	public static PersonalDataDto ToDto(this PersonalDataGrpcModel grpcModel)
-	{
-		return new PersonalDataDto(
-			grpcModel.Id,
-			grpcModel.UserId,
-			grpcModel.FirstName,
-			grpcModel.LastName,
-			grpcModel.Country,
-			grpcModel.City
-		);
-	}
+    public static PersonalDataDto ToDto(this PersonalDataGrpcModel grpcModel, List<Guid>? kycScansIds = null)
+    {
+        return new PersonalDataDto
+        {
+            Id = grpcModel.Id,
+            UserId = grpcModel.UserId,
+            FirstName = grpcModel.FirstName,
+            LastName = grpcModel.LastName,
+            Country = grpcModel.Country,
+            City = grpcModel.City,
+            KycScansIds = kycScansIds ?? new List<Guid>()
+        };
+    }
 }

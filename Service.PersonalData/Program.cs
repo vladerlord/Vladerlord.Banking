@@ -18,7 +18,7 @@ StartupUtils.ConfigureLogging(builder);
 Chassis.Grpc.StartupUtils.ConfigureDapperContextBuilder(builder, databaseConnectionString);
 Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingBuilder(builder);
 Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, databaseConnectionString,
-	Assembly.GetExecutingAssembly());
+    Assembly.GetExecutingAssembly());
 
 BindSystemServices(builder.Services);
 BindRepositories(builder.Services);
@@ -37,25 +37,25 @@ app.Run();
 
 void BindSystemServices(IServiceCollection services)
 {
-	services.AddCodeFirstGrpc();
-	services.AddGrpc();
+    services.AddCodeFirstGrpc();
+    services.AddGrpc();
 }
 
 void BindRepositories(IServiceCollection services)
 {
-	services.AddScoped<IPersonalDataRepository, PersonalDataRepository>();
-	services.AddScoped<IKycScanRepository, KycScanRepository>();
+    services.AddScoped<IPersonalDataRepository, PersonalDataRepository>();
+    services.AddScoped<IKycScanRepository, KycScanRepository>();
 }
 
 void BindAppServices(IServiceCollection services)
 {
-	var scansFolder = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_SCANS_VOLUME_FOLDER");
-	var encryptionKey = EnvironmentUtils.GetRequiredEnvironmentVariable("SECURITY_ENCRYPTION_KEY");
+    var scansFolder = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_SCANS_VOLUME_FOLDER");
+    var encryptionKey = EnvironmentUtils.GetRequiredEnvironmentVariable("SECURITY_ENCRYPTION_KEY");
 
-	services.AddSingleton(new EncryptionService(encryptionKey));
-	services.AddScoped(_ => new KycScansFileService(scansFolder));
-	services.AddScoped<KycScansService>();
-	services.AddScoped<PersonalDataService>();
-	services.AddScoped<PersonalDataEncryptionService>();
-	services.AddScoped<KycScanEncryptionService>();
+    services.AddSingleton(new EncryptionService(encryptionKey));
+    services.AddScoped(_ => new KycScansFileService(scansFolder));
+    services.AddScoped<KycScansService>();
+    services.AddScoped<PersonalDataService>();
+    services.AddScoped<PersonalDataEncryptionService>();
+    services.AddScoped<KycScanEncryptionService>();
 }

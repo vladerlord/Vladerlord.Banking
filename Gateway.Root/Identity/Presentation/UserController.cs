@@ -1,3 +1,4 @@
+using Chassis.Gateway.ApiResponse;
 using Gateway.Root.Identity.Application;
 using Gateway.Root.Identity.Presentation.Models;
 using Gateway.Root.Identity.Presentation.Views;
@@ -12,57 +13,73 @@ namespace Gateway.Root.Identity.Presentation;
 [Route("[controller]")]
 public class UserController : Controller
 {
-	private readonly IIdentityGrpcService _identityGrpcService;
-	private readonly UserResetService _userResetService;
+    private readonly IIdentityGrpcService _identityGrpcService;
+    private readonly UserResetService _userResetService;
+    private readonly UserService _userService;
 
-	public UserController(IIdentityGrpcService identityGrpcService, UserResetService userResetService)
-	{
-		_identityGrpcService = identityGrpcService;
-		_userResetService = userResetService;
-	}
+    public UserController(IIdentityGrpcService identityGrpcService, UserResetService userResetService,
+        UserService userService)
+    {
+        _identityGrpcService = identityGrpcService;
+        _userResetService = userResetService;
+        _userService = userService;
+    }
 
-	[HttpPost("login")]
-	public async Task<IActionResult> Login([FromBody] LoginUserHttpRequest request)
-	{
-		var response = await _identityGrpcService.LoginAsync(request.ToGrpcRequest());
-		var httpResponse = new LoginUserHttpResponse(response.Status, response.Jwt);
+    [HttpPost("login")]
+    [ApiResponseWrapper]
+    public async Task<IActionResult> Login([FromBody] LoginUserHttpRequest request)
+    {
+        var appResponse = await _userService.LoginAsync(request.Email, request.Password);
 
-		return new JsonResult(httpResponse)
-		{
-			StatusCode = httpResponse.StatusCode
-		};
-	}
+        var httpResponse = new LoginUserHttpResponse
+        {
+            Status = appResponse.GrpcStatus.Status.ToString(),
+            Jwt = appResponse.Content.Jwt,
+            User = appResponse.Content.User
+        };
 
-	[HttpPost("register")]
-	public async Task<IActionResult> Register([FromBody] RegisterUserHttpRequest request)
-	{
-		var confirmationCode = _userResetService.GenerateConfirmationCode();
-		var confirmationUrl = _userResetService.BuildUserRegistrationConfirmationBaseUri(confirmationCode);
-		var grpcRequest = request.ToGrpcRequest(confirmationCode, confirmationUrl);
+        return new JsonResult(httpResponse)
+        {
+            StatusCode = appResponse.GrpcStatus.Status.ToHttpCode()
+        };
+    }
 
-		var response = await _identityGrpcService.RegisterAsync(grpcRequest);
-		var httpResponse = new RegisterUserHttpResponse(response.Status);
+    [HttpPost("register")]
+    [ApiResponseWrapper]
+    public async Task<IActionResult> Register([FromBody] RegisterUserHttpRequest request)
+    {
+        var confirmationCode = _userResetService.GenerateConfirmationCode();
+        var confirmationUrl = _userResetService.BuildUserRegistrationConfirmationBaseUri(confirmationCode);
 
-		return new JsonResult(httpResponse)
-		{
-			StatusCode = httpResponse.StatusCode
-		};
-	}
+        var appResponse =
+            await _userService.RegisterAsync(confirmationCode, confirmationUrl, request.Email, request.Password);
 
-	[ActionName("RegisterConfirmation")]
-	[HttpGet("register-confirmation/{confirmationCode}")]
-	public async Task<IActionResult> RegistrationConfirmation(string confirmationCode)
-	{
-		var response = await _identityGrpcService.RegisterConfirmationAsync(new RegisterConfirmationGrpcRequest
-		{
-			ConfirmationCode = confirmationCode
-		});
+        var httpResponse = new RegisterUserHttpResponse
+        {
+            Status = appResponse.GrpcStatus.Status.ToString(),
+            User = appResponse.Content
+        };
 
-		var viewModel = new UserRegistrationConfirmation
-		{
-			IsSuccess = response.Status == GrpcResponseStatus.Ok
-		};
+        return new JsonResult(httpResponse)
+        {
+            StatusCode = appResponse.GrpcStatus.Status.ToHttpCode()
+        };
+    }
 
-		return View("~/Identity/Presentation/Views/UserRegistrationConfirmation.cshtml", viewModel);
-	}
+    [ActionName("RegisterConfirmation")]
+    [HttpGet("register-confirmation/{confirmationCode}")]
+    public async Task<IActionResult> RegistrationConfirmation(string confirmationCode)
+    {
+        var response = await _identityGrpcService.RegisterConfirmationAsync(new RegisterConfirmationGrpcRequest
+        {
+            ConfirmationCode = confirmationCode
+        });
+
+        var viewModel = new UserRegistrationConfirmation
+        {
+            IsSuccess = response.Status == GrpcResponseStatus.Ok
+        };
+
+        return View("~/Identity/Presentation/Views/UserRegistrationConfirmation.cshtml", viewModel);
+    }
 }

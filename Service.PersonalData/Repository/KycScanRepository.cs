@@ -8,16 +8,16 @@ namespace Service.PersonalData.Repository;
 
 public class KycScanRepository : IKycScanRepository
 {
-	private readonly DapperContext _dapperContext;
+    private readonly DapperContext _dapperContext;
 
-	public KycScanRepository(DapperContext dapperContext)
-	{
-		_dapperContext = dapperContext;
-	}
+    public KycScanRepository(DapperContext dapperContext)
+    {
+        _dapperContext = dapperContext;
+    }
 
-	public async Task<KycScanDatabaseModel> CreateAsync(KycScanDatabaseModel model)
-	{
-		var sql = $@"
+    public async Task<KycScanDatabaseModel> CreateAsync(KycScanDatabaseModel model)
+    {
+        var sql = $@"
 	INSERT INTO {KycScanDbSchema.Table}
 	({KycScanDbSchema.Columns.PersonalDataId},
 	{KycScanDbSchema.Columns.FileName},
@@ -26,49 +26,49 @@ public class KycScanRepository : IKycScanRepository
 	{KycScanDbSchema.Columns.ContentType})
 	VALUES (@PersonalDataId, @FileName, @FileExtension, @OriginalName, @ContentType)";
 
-		using var connection = _dapperContext.CreateConnection();
+        using var connection = _dapperContext.CreateConnection();
 
-		await connection.ExecuteAsync(sql, model);
+        await connection.ExecuteAsync(sql, model);
 
-		return model;
-	}
+        return model;
+    }
 
-	public async Task<IEnumerable<KycScanDatabaseModel>> GetByPersonalDataIdAsync(Guid personalDataId)
-	{
-		var sql = $@"
+    public async Task<IEnumerable<KycScanDatabaseModel>> GetByPersonalDataIdAsync(Guid personalDataId)
+    {
+        var sql = $@"
 	SELECT * FROM {KycScanDbSchema.Table} WHERE {KycScanDbSchema.Columns.PersonalDataId} = @PersonalDataId";
 
-		using var connection = _dapperContext.CreateConnection();
+        using var connection = _dapperContext.CreateConnection();
 
-		return await connection.QueryAsync<KycScanDatabaseModel>(sql, new
-		{
-			PersonalDataId = personalDataId
-		});
-	}
+        return await connection.QueryAsync<KycScanDatabaseModel>(sql, new
+        {
+            PersonalDataId = personalDataId
+        });
+    }
 
-	public async Task<KycScanDatabaseModel?> FindByIdAsync(Guid id)
-	{
-		var sql = $@"
+    public async Task<KycScanDatabaseModel?> FindByIdAsync(Guid id)
+    {
+        var sql = $@"
 	SELECT * FROM {KycScanDbSchema.Table} WHERE {KycScanDbSchema.Columns.FileName} = @FileName";
 
-		using var connection = _dapperContext.CreateConnection();
+        using var connection = _dapperContext.CreateConnection();
 
-		return await connection.QuerySingleOrDefaultAsync<KycScanDatabaseModel>(sql, new
-		{
-			FileName = id
-		});
-	}
+        return await connection.QuerySingleOrDefaultAsync<KycScanDatabaseModel>(sql, new
+        {
+            FileName = id
+        });
+    }
 
-	public async Task DeleteByPersonalDataIdAsync(Guid personalDataId)
-	{
-		var sql = $@"
+    public async Task DeleteByPersonalDataIdAsync(Guid personalDataId)
+    {
+        var sql = $@"
 	DELETE FROM {KycScanDbSchema.Table} WHERE {KycScanDbSchema.Columns.PersonalDataId} = @PersonalDataId";
 
-		using var connection = _dapperContext.CreateConnection();
+        using var connection = _dapperContext.CreateConnection();
 
-		await connection.ExecuteAsync(sql, new
-		{
-			PersonalDataId = personalDataId
-		});
-	}
+        await connection.ExecuteAsync(sql, new
+        {
+            PersonalDataId = personalDataId
+        });
+    }
 }
