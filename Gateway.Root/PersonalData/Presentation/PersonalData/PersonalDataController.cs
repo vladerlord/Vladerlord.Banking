@@ -1,3 +1,4 @@
+using Chassis.Gateway.ApiResponse;
 using Gateway.Root.PersonalData.Application;
 using Gateway.Root.PersonalData.Presentation.PersonalData.HttpModels;
 using Gateway.Root.Shared;
@@ -18,7 +19,7 @@ public class PersonalDataController : ControllerBase
     }
 
     [JwtAuthentication]
-    [HttpPost("request-approval")]
+    [HttpPost("request-approval"), ApiResponseWrapper]
     public async Task<IActionResult> RequestApproval([FromForm] RequestApprovalRequest requestApprovalRequest)
     {
         var userId = HttpContext.GetUserId();

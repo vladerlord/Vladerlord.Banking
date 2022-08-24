@@ -6,13 +6,14 @@ using Gateway.Root.Identity.Application;
 using Gateway.Root.PersonalData.Application;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Events;
+using Serilog;
+using Shared.Grpc.BankAccount;
 using Shared.Grpc.Identity;
 using Shared.Grpc.PersonalData;
 
 var builder = WebApplication.CreateBuilder(args);
 
-StartupUtils.ConfigureLogging(builder, LogEventLevel.Debug);
+StartupUtils.ConfigureLogging(builder);
 
 builder.Services
     .AddControllers(options =>
@@ -30,7 +31,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 builder.Services.Configure<HandleExceptionOptions>(options => options.ApiVersion = "1.0.0");
+builder.Services.Configure<JsonOptions>(options =>
+    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()));
 
+BindSystemServices(builder.Services);
 BindAppServices(builder.Services);
 BindGrpcServices(builder);
 
@@ -55,14 +59,21 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
+void BindSystemServices(IServiceCollection services)
+{
+    services.AddSingleton(Log.Logger);
+}
+
 void BindGrpcServices(WebApplicationBuilder weBuilder)
 {
     var identityGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_GRPC");
     var personalDataGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("PERSONAL_DATA_GRPC");
+    var bankAccountGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("BANK_ACCOUNT_GRPC");
 
     weBuilder.Services.AddGrpcService<IIdentityGrpcService>(identityGrpc);
     weBuilder.Services.AddGrpcService<IPersonalDataGrpcService>(personalDataGrpc);
     weBuilder.Services.AddGrpcService<IKycScanGrpcService>(personalDataGrpc);
+    weBuilder.Services.AddGrpcService<IBankAccountGrpcService>(bankAccountGrpc);
 }
 
 void BindAppServices(IServiceCollection services)

@@ -1,0 +1,14 @@
+﻿{
+  "profiles": {
+    "Service.BankAccount": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5167;https://localhost:7067",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "BANK_ACCOUNT_DB_CONNECTION": "Host=localhost;Port=5434;Username=user;Password=password;Database=bank_account"
+      }
+    }
+  }
+}

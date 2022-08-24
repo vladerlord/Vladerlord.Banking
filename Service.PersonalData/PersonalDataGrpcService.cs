@@ -96,6 +96,21 @@ public class PersonalDataGrpcService : IPersonalDataGrpcService
         return response;
     }
 
+    public async Task<GetByUserIdPersonalDataByIdGrpcResponse> GetByUserIdAsync(
+        GetByUserIdPersonalDataByIdGrpcRequest request)
+    {
+        var personalData = await _personalDataService.FindByUserId(request.UserId);
+
+        return new GetByUserIdPersonalDataByIdGrpcResponse
+        {
+            GrpcResponse = new GrpcResponse
+            {
+                Status = personalData != null ? GrpcResponseStatus.Ok : GrpcResponseStatus.NotFound
+            },
+            PersonalData = personalData?.ToGrpcModel()
+        };
+    }
+
     public async Task<ApprovePersonalDataGrpcResponse> ApprovePersonalDataAsync(ApprovePersonalDataGrpcRequest request)
     {
         PersonalDataDatabaseModel personalData;

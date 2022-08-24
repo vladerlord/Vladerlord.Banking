@@ -15,6 +15,9 @@ public interface IPersonalDataGrpcService
     [OperationContract(Name = "GetByIdAsync")]
     Task<GetPersonalDataByIdGrpcResponse> GetByIdAsync(GetPersonalDataByIdGrpcRequest request);
 
+    [OperationContract(Name = "GetByUserIdAsync")]
+    Task<GetByUserIdPersonalDataByIdGrpcResponse> GetByUserIdAsync(GetByUserIdPersonalDataByIdGrpcRequest request);
+
     [OperationContract(Name = "ApprovePersonalDataAsync")]
     Task<ApprovePersonalDataGrpcResponse> ApprovePersonalDataAsync(ApprovePersonalDataGrpcRequest request);
 

@@ -22,6 +22,29 @@ services:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'password'
 
+  bankAccountDb:
+    image: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - bankAccountDb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: 'bank_account'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'password'
+
+  currencyDb:
+    image: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - currencyDb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: 'currency'
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'password'
+
+
   rabbit:
     image: rabbitmq:management-alpine
     ports:
@@ -37,4 +60,8 @@ volumes:
   identityDb:
     driver: local
   personalDataDb:
+    driver: local
+  bankAccountDb:
+    driver: local
+  currencyDb:
     driver: local

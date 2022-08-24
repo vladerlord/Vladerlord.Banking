@@ -1,0 +1,14 @@
+﻿{
+  "profiles": {
+    "Service.Currency": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5299;https://localhost:7271",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CURRENCY_DB_CONNECTION": "Host=localhost;Port=5435;Username=user;Password=password;Database=currency"
+      }
+    }
+  }
+}
