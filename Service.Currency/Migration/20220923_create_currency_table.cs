@@ -11,7 +11,7 @@ public class CreateCurrencyTable : FluentMigrator.Migration
     {
         Create.Table(TableName)
             .WithColumn("code").AsString(3).NotNullable().PrimaryKey()
-            .WithColumn("exchange_rate_to_usd").AsInt64().NotNullable().WithDefaultValue(1_000_000); // 1 dollar
+            .WithColumn("exchange_rate_to_usd").AsDecimal(19, 9).NotNullable();
     }
 
     public override void Down()

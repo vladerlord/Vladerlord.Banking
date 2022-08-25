@@ -16,8 +16,4 @@
         <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="DapperType" />
-    </ItemGroup>
-
 </Project>

@@ -20,6 +20,7 @@
         "IDENTITY_GRPC": "http://localhost:5074",
         "PERSONAL_DATA_GRPC": "http://localhost:5073",
         "BANK_ACCOUNT_GRPC": "http://localhost:5075",
+        "CURRENCY_GRPC": "http://localhost:5077",
         "DOMAIN": "http://vladerlord.fun:5100"
       }
     }

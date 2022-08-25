@@ -1,11 +1,9 @@
 using System.Reflection;
 using Chassis;
-using Chassis.Grpc.DapperDataType;
 using Dapper;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using ProtoBuf.Grpc.Server;
 using Quartz;
-using Serilog.Events;
 using Service.Currency;
 using Service.Currency.Abstraction;
 using Service.Currency.BackgroundJob;
@@ -18,13 +16,11 @@ var identityConnectionString = EnvironmentUtils.GetRequiredEnvironmentVariable("
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-StartupUtils.ConfigureLogging(builder, LogEventLevel.Verbose);
+StartupUtils.ConfigureLogging(builder);
 Chassis.Grpc.StartupUtils.ConfigureDapperContextBuilder(builder, identityConnectionString);
 Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingBuilder(builder);
 Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, identityConnectionString,
     Assembly.GetExecutingAssembly());
-
-SqlMapper.AddTypeHandler(new MoneyValueHandler());
 
 BindSystemServices(builder.Services);
 BindRepositories(builder.Services);
@@ -55,8 +51,7 @@ void BindSystemServices(IServiceCollection services)
         {
             config.ForJob(updateCurrencyRateKey)
                 .WithIdentity($"{updateCurrencyRateKey.Name}_trigger")
-                .WithSimpleSchedule().StartNow();
-            // .WithCronSchedule("0/5 * * * * ?");
+                .WithCronSchedule("0/30 * * * * ?");
         });
     });
     services.AddQuartzServer(options =>

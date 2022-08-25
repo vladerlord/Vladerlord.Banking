@@ -1,6 +1,5 @@
 using Service.BankAccount.Abstraction;
 using Service.BankAccount.Model;
-using Shared.Abstractions;
 using Shared.Grpc;
 using Shared.Grpc.BankAccount;
 using Shared.Grpc.BankAccount.Contract;
@@ -18,8 +17,7 @@ public class BankAccountGrpcService : IBankAccountGrpcService
 
     public async Task<CreateBankAccountGrpcResponse> CreateAsync(CreateBankAccountGrpcRequest request)
     {
-        var balance = new MoneyValue(0);
-        var databaseModel = await _bankAccountRepository.CreateAsync(request.ToDatabaseModel(balance));
+        var databaseModel = await _bankAccountRepository.CreateAsync(request.ToDatabaseModel(0m));
 
         return new CreateBankAccountGrpcResponse
         {

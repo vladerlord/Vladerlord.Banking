@@ -6,8 +6,8 @@ using Gateway.Root.Identity.Application;
 using Gateway.Root.PersonalData.Application;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using Shared.Grpc.BankAccount;
+using Shared.Grpc.Currency;
 using Shared.Grpc.Identity;
 using Shared.Grpc.PersonalData;
 
@@ -61,7 +61,6 @@ app.Run();
 
 void BindSystemServices(IServiceCollection services)
 {
-    services.AddSingleton(Log.Logger);
 }
 
 void BindGrpcServices(WebApplicationBuilder weBuilder)
@@ -69,11 +68,13 @@ void BindGrpcServices(WebApplicationBuilder weBuilder)
     var identityGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("IDENTITY_GRPC");
     var personalDataGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("PERSONAL_DATA_GRPC");
     var bankAccountGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("BANK_ACCOUNT_GRPC");
+    var currencyGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("CURRENCY_GRPC");
 
     weBuilder.Services.AddGrpcService<IIdentityGrpcService>(identityGrpc);
     weBuilder.Services.AddGrpcService<IPersonalDataGrpcService>(personalDataGrpc);
     weBuilder.Services.AddGrpcService<IKycScanGrpcService>(personalDataGrpc);
     weBuilder.Services.AddGrpcService<IBankAccountGrpcService>(bankAccountGrpc);
+    weBuilder.Services.AddGrpcService<ICurrencyGrpcService>(currencyGrpc);
 }
 
 void BindAppServices(IServiceCollection services)

@@ -1,9 +1,9 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace Chassis.Gateway.ApiResponse;
 
@@ -16,7 +16,8 @@ public class ApiResponseWrapperMiddleware
         _next = next;
     }
 
-    public async Task Invoke(HttpContext context, IOptions<HandleExceptionOptions> options, ILogger logger)
+    public async Task Invoke(HttpContext context, IOptions<HandleExceptionOptions> options,
+        ILogger<ApiResponseWrapperMiddleware> logger)
     {
         var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
         var attribute = endpoint?.Metadata.GetMetadata<ApiResponseWrapperAttribute>();
@@ -65,7 +66,7 @@ public class ApiResponseWrapperMiddleware
     }
 
     private async Task HandleSystemException(HttpContext context, IOptions<HandleExceptionOptions> options,
-        ILogger logger, Stream? stream = null)
+        ILogger<ApiResponseWrapperMiddleware> logger, Stream? stream = null)
     {
         try
         {
@@ -73,7 +74,7 @@ public class ApiResponseWrapperMiddleware
         }
         catch (Exception e)
         {
-            logger.Error("{Message}", e.ToString());
+            logger.LogError("{Message}", e.ToString());
 
             var response = new ExceptionApiResponse(options.Value.ApiVersion, context.Response.StatusCode)
             {

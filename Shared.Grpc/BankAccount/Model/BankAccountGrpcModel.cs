@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using Shared.Abstractions;
 
 namespace Shared.Grpc.BankAccount.Model;
 
@@ -9,7 +8,7 @@ public class BankAccountGrpcModel
     [DataMember(Order = 1)] public Guid Id { get; init; }
     [DataMember(Order = 2)] public Guid PersonalDataId { get; init; }
     [DataMember(Order = 3)] public string CurrencyCode { get; init; }
-    [DataMember(Order = 4)] public MoneyValue Balance { get; init; }
+    [DataMember(Order = 4)] public decimal Balance { get; init; }
     [DataMember(Order = 5)] public string ExpireAt { get; init; }
 
     public DateOnly ExpireAtProperty

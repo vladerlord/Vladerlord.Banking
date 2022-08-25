@@ -16,21 +16,6 @@ public class PostgresCurrencyRepository : ICurrencyRepository
         _dapperContext = dapperContext;
     }
 
-    public async Task<CurrencyDatabaseModel> CreateAsync(CurrencyDatabaseModel model)
-    {
-        var sql = $@"
-	INSERT INTO {CurrencyDbSchema.Table}
-	({CurrencyDbSchema.Columns.Code},
-	{CurrencyDbSchema.Columns.ExchangeRateToUsd})
-	VALUES (@Code, @ExchangeRateToUsd)";
-
-        using var connection = _dapperContext.CreateConnection();
-
-        await connection.ExecuteAsync(sql, model);
-
-        return model;
-    }
-
     public async Task UpdateCurrenciesAsync(IEnumerable<CurrencyDatabaseModel> models)
     {
         var sql = $@"
@@ -70,5 +55,17 @@ public class PostgresCurrencyRepository : ICurrencyRepository
         using var connection = _dapperContext.CreateConnection();
 
         return await connection.QueryAsync<CurrencyDatabaseModel>(sql);
+    }
+
+    public async Task<CurrencyDatabaseModel?> FindByCodeAsync(string code)
+    {
+        var sql = $@"SELECT * FROM {CurrencyDbSchema.Table} WHERE {CurrencyDbSchema.Columns.Code} = @Code";
+
+        using var connection = _dapperContext.CreateConnection();
+
+        return await connection.QuerySingleOrDefaultAsync<CurrencyDatabaseModel>(sql, new
+        {
+            Code = code
+        });
     }
 }

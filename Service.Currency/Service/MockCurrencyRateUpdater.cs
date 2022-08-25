@@ -1,29 +1,41 @@
 using Service.Currency.Abstraction;
-using Service.Currency.Model;
-using Shared.Abstractions;
 
 namespace Service.Currency.Service;
 
 public class MockCurrencyRateUpdater : ICurrencyRateUpdater
 {
     private readonly ICurrencyRepository _currencyRepository;
+    private readonly ILogger _logger;
 
-    public MockCurrencyRateUpdater(ICurrencyRepository currencyRepository)
+    public MockCurrencyRateUpdater(ICurrencyRepository currencyRepository, ILogger<MockCurrencyRateUpdater> logger)
     {
         _currencyRepository = currencyRepository;
+        _logger = logger;
     }
 
     public async Task UpdateAllCurrencyRates()
     {
         var random = new Random();
+        var currencies = (await _currencyRepository.GetAllAsync()).ToList();
 
-        var mockData = new List<CurrencyDatabaseModel>
+        _logger.LogInformation("Updating currencies exchange rates");
+
+        foreach (var currencyDatabaseModel in currencies)
         {
-            new("USD", new MoneyValue(1_000_000)),
-            new("EUR", new MoneyValue(random.NextInt64(1_000_000, 1_100_000))),
-            new("UAH", new MoneyValue(random.NextInt64(0_036_500, 0_037_000))),
-        };
+            // usd is always 1
+            if (currencyDatabaseModel.Code == "USD") continue;
 
-        await _currencyRepository.UpdateCurrenciesAsync(mockData);
+            var multiplier = (1000 + random.Next(-10, 10)) / 1000m;
+            var newValue = currencyDatabaseModel.ExchangeRateToUsd * multiplier;
+
+            if (newValue <= 0) continue;
+
+            _logger.LogInformation("Changing {Code}: {Old} to {New}",
+                currencyDatabaseModel.Code, currencyDatabaseModel.ExchangeRateToUsd, newValue);
+
+            currencyDatabaseModel.ExchangeRateToUsd = newValue;
+        }
+
+        await _currencyRepository.UpdateCurrenciesAsync(currencies);
     }
 }

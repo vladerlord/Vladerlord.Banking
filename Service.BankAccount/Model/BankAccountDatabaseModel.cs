@@ -1,4 +1,3 @@
-using Shared.Abstractions;
 using Shared.Grpc.BankAccount.Contract;
 using Shared.Grpc.BankAccount.Model;
 
@@ -9,10 +8,10 @@ public class BankAccountDatabaseModel
     public Guid Id { get; }
     public Guid PersonalDataId { get; }
     public string CurrencyCode { get; }
-    public MoneyValue Balance { get; }
+    public decimal Balance { get; }
     public DateOnly ExpireAt { get; }
 
-    public BankAccountDatabaseModel(Guid id, Guid personalDataId, string currencyCode, MoneyValue balance,
+    public BankAccountDatabaseModel(Guid id, Guid personalDataId, string currencyCode, decimal balance,
         DateOnly expireAt)
     {
         Id = id;
@@ -37,8 +36,7 @@ public class BankAccountDatabaseModel
 
 public static class BankAccountDatabaseModelExtension
 {
-    public static BankAccountDatabaseModel ToDatabaseModel(this CreateBankAccountGrpcRequest request,
-        MoneyValue balance)
+    public static BankAccountDatabaseModel ToDatabaseModel(this CreateBankAccountGrpcRequest request, decimal balance)
     {
         return new BankAccountDatabaseModel(
             Guid.NewGuid(),

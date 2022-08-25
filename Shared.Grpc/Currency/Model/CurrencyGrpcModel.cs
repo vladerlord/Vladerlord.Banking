@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using Shared.Abstractions;
 
 namespace Shared.Grpc.Currency.Model;
 
@@ -7,7 +6,7 @@ namespace Shared.Grpc.Currency.Model;
 public class CurrencyGrpcModel
 {
     [DataMember] public string Code { get; init; }
-    [DataMember] public MoneyValue ExchangeRateToUsd { get; init; }
+    [DataMember] public decimal ExchangeRateToUsd { get; init; }
 
     public CurrencyGrpcModel()
     {

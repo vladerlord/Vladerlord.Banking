@@ -1,19 +1,13 @@
-using Service.Currency.Abstraction;
 using Service.Currency.Model;
 
 namespace Service.Currency.Service;
 
 public class CurrencyService
 {
-    private readonly ICurrencyRepository _currencyRepository;
-    
-    public CurrencyService(ICurrencyRepository currencyRepository)
+    public decimal Exchange(CurrencyDatabaseModel from, CurrencyDatabaseModel to, decimal amount)
     {
-        _currencyRepository = currencyRepository;
-    }
-    
-    public async Task CreateAsync(CurrencyDatabaseModel model)
-    {
-        await _currencyRepository.CreateAsync(model);
+        var amountAsUsd = from.ExchangeRateToUsd * amount;
+
+        return decimal.Round(amountAsUsd / to.ExchangeRateToUsd, 6);
     }
 }

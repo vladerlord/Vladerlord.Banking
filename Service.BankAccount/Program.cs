@@ -23,7 +23,6 @@ Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, identityConnec
 builder.Services.Configure<JsonOptions>(options =>
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()));
 
-SqlMapper.AddTypeHandler(new MoneyValueHandler());
 SqlMapper.AddTypeHandler(new DateOnlyHandler());
 
 BindSystemServices(builder.Services);

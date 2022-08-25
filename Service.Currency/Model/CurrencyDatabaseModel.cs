@@ -1,4 +1,3 @@
-using Shared.Abstractions;
 using Shared.Grpc.Currency.Model;
 
 namespace Service.Currency.Model;
@@ -6,9 +5,14 @@ namespace Service.Currency.Model;
 public class CurrencyDatabaseModel
 {
     public string Code { get; }
-    public MoneyValue ExchangeRateToUsd { get; }
+    public decimal ExchangeRateToUsd { get; set; }
 
-    public CurrencyDatabaseModel(string code, MoneyValue exchangeRateToUsd)
+    public CurrencyDatabaseModel()
+    {
+        Code = string.Empty;
+    }
+
+    public CurrencyDatabaseModel(string code, decimal exchangeRateToUsd)
     {
         Code = code;
         ExchangeRateToUsd = exchangeRateToUsd;

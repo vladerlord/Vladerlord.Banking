@@ -27,7 +27,7 @@ public static class BankAccountDtoExtensions
             Id = grpcModel.Id,
             PersonalDataId = grpcModel.PersonalDataId,
             CurrencyCode = grpcModel.CurrencyCode,
-            Balance = grpcModel.Balance.GetAsDecimal(),
+            Balance = grpcModel.Balance,
             ExpireAt = grpcModel.ExpireAtProperty
         };
     }
