@@ -6,11 +6,11 @@ using Shared.Abstractions;
 
 namespace Chassis.Gateway;
 
-public class AdminPermissionRequiredMiddleware
+public class PermissionRequiredMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public AdminPermissionRequiredMiddleware(RequestDelegate next)
+    public PermissionRequiredMiddleware(RequestDelegate next)
     {
         _next = next;
     }
@@ -18,7 +18,7 @@ public class AdminPermissionRequiredMiddleware
     public async Task Invoke(HttpContext context)
     {
         var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
-        var attribute = endpoint?.Metadata.GetMetadata<AdminPermissionRequiredAttribute>();
+        var attribute = endpoint?.Metadata.GetMetadata<PermissionRequiredAttribute>();
 
         if (attribute == null)
         {
@@ -26,7 +26,7 @@ public class AdminPermissionRequiredMiddleware
             return;
         }
 
-        if (!context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == UserStatus.Admin.AsString()))
+        if (!context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == attribute.Role.AsString()))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;

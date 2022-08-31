@@ -34,7 +34,6 @@ builder.Services.Configure<HandleExceptionOptions>(options => options.ApiVersion
 builder.Services.Configure<JsonOptions>(options =>
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()));
 
-BindSystemServices(builder.Services);
 BindAppServices(builder.Services);
 BindGrpcServices(builder);
 
@@ -51,17 +50,13 @@ else
 }
 
 app.UseMiddleware<JwtAuthenticationMiddleware>();
-app.UseMiddleware<AdminPermissionRequiredMiddleware>();
+app.UseMiddleware<PermissionRequiredMiddleware>();
 app.UseMiddleware<ApiResponseWrapperMiddleware>();
 
 app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
-
-void BindSystemServices(IServiceCollection services)
-{
-}
 
 void BindGrpcServices(WebApplicationBuilder weBuilder)
 {

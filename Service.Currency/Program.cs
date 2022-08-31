@@ -54,10 +54,7 @@ void BindSystemServices(IServiceCollection services)
                 .WithCronSchedule("0/30 * * * * ?");
         });
     });
-    services.AddQuartzServer(options =>
-    {
-        options.WaitForJobsToComplete = true;
-    });
+    services.AddQuartzServer(options => { options.WaitForJobsToComplete = true; });
 }
 
 void BindRepositories(IServiceCollection services)

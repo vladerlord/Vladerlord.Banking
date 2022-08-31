@@ -5,7 +5,8 @@ public enum UserStatus
     Created,
     Confirmed,
     Approved,
-    Admin
+    Admin,
+    Atm
 }
 
 public static class UserStatusExtensions

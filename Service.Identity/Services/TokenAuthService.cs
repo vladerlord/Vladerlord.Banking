@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Service.Identity.Models;
+using Shared.Abstractions;
 
 namespace Service.Identity.Services;
 
@@ -26,7 +27,7 @@ public class TokenAuthService
             {
                 new Claim(ClaimTypes.PrimarySid, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Status.ToString().ToLower())
+                new Claim(ClaimTypes.Role, user.Status.AsString())
             }),
             Expires = DateTime.UtcNow.AddMinutes(_expirationMinutes),
             SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)

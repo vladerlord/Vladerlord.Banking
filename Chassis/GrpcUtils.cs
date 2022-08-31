@@ -2,7 +2,7 @@ using Grpc.Net.ClientFactory;
 using Microsoft.Extensions.DependencyInjection;
 using ProtoBuf.Grpc.ClientFactory;
 
-namespace Chassis.Gateway;
+namespace Chassis;
 
 public static class GrpcUtils
 {

@@ -11,7 +11,9 @@ public enum GrpcResponseStatus
     UserAlreadyExist,
     AlreadyInProcess,
     AlreadyApproved,
-    AlreadyChanged
+    AlreadyChanged,
+    BankAccountNotFound,
+    CurrencyExchangeError
 }
 
 public static class GrpcResponseStatusExtenstion

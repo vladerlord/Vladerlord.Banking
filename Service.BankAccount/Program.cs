@@ -8,6 +8,7 @@ using ProtoBuf.Grpc.Server;
 using Service.BankAccount;
 using Service.BankAccount.Abstraction;
 using Service.BankAccount.Repository;
+using Shared.Grpc.Currency;
 
 var builder = WebApplication.CreateBuilder(args);
 var identityConnectionString = EnvironmentUtils.GetRequiredEnvironmentVariable("BANK_ACCOUNT_DB_CONNECTION");
@@ -27,8 +28,7 @@ SqlMapper.AddTypeHandler(new DateOnlyHandler());
 
 BindSystemServices(builder.Services);
 BindRepositories(builder.Services);
-BindAppServices(builder.Services);
-
+BindGrpcServices(builder.Services);
 
 builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(5075, o => o.Protocols = HttpProtocols.Http2); });
 
@@ -52,6 +52,9 @@ void BindRepositories(IServiceCollection services)
     services.AddScoped<IBankAccountRepository, PostgresBankAccountRepository>();
 }
 
-void BindAppServices(IServiceCollection services)
+void BindGrpcServices(IServiceCollection services)
 {
+    var currencyGrpc = EnvironmentUtils.GetRequiredEnvironmentVariable("CURRENCY_GRPC");
+
+    services.AddGrpcService<ICurrencyGrpcService>(currencyGrpc);
 }

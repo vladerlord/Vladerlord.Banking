@@ -5,8 +5,8 @@ namespace Shared.Grpc.Currency.Model;
 [DataContract]
 public class CurrencyGrpcModel
 {
-    [DataMember] public string Code { get; init; }
-    [DataMember] public decimal ExchangeRateToUsd { get; init; }
+    [DataMember(Order = 1)] public string Code { get; init; }
+    [DataMember(Order = 2)] public decimal ExchangeRateToUsd { get; init; }
 
     public CurrencyGrpcModel()
     {

@@ -5,9 +5,9 @@ namespace Shared.Grpc.Currency.Contract;
 [DataContract]
 public class ExchangeGrpcRequest
 {
-    [DataMember] public string FromCurrencyCode { get; init; }
-    [DataMember] public string ToCurrencyCode { get; init; }
-    [DataMember] public decimal Amount { get; init; }
+    [DataMember(Order = 1)] public string FromCurrencyCode { get; init; }
+    [DataMember(Order = 2)] public string ToCurrencyCode { get; init; }
+    [DataMember(Order = 3)] public decimal Amount { get; init; }
 
     public ExchangeGrpcRequest()
     {

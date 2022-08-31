@@ -4,13 +4,14 @@ using Gateway.Root.PersonalData.Application;
 using Gateway.Root.PersonalData.Presentation.PersonalDataManagement.HttpModels;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Abstractions;
 using Shared.Grpc;
 
 namespace Gateway.Root.PersonalData.Presentation.PersonalDataManagement;
 
 [ApiController]
 [JwtAuthentication]
-[AdminPermissionRequired]
+[PermissionRequired(UserStatus.Admin)]
 [Route("personal-data/management")]
 public class PersonalDataManagementController : ControllerBase
 {

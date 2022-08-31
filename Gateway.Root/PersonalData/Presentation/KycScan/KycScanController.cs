@@ -2,6 +2,7 @@ using Chassis.Gateway;
 using Gateway.Root.PersonalData.Presentation.KycScan.HttpModels;
 using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Abstractions;
 using Shared.Grpc.PersonalData;
 using Shared.Grpc.PersonalData.Contracts;
 
@@ -19,7 +20,7 @@ public class KycScanController : Controller
     }
 
     [JwtAuthentication]
-    [AdminPermissionRequired]
+    [PermissionRequired(UserStatus.Admin)]
     [HttpGet("{kycScanId}")]
     public async Task<IActionResult> GetById([FromRoute] GetByIdRequest request)
     {

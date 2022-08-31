@@ -5,6 +5,7 @@ using Gateway.Root.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Grpc;
 using Shared.Grpc.BankAccount;
+using Shared.Grpc.BankAccount.Contract;
 using Shared.Grpc.Currency;
 using Shared.Grpc.Currency.Contract;
 using Shared.Grpc.PersonalData;
@@ -68,6 +69,72 @@ public class BankAccountController : ControllerBase
         };
 
         return new JsonResult(httpResponse)
+        {
+            StatusCode = grpcResponse.GrpcResponse.Status.ToHttpCode()
+        };
+    }
+
+    [JwtAuthentication]
+    [HttpPost("transfer"), ApiResponseWrapper]
+    public async Task<IActionResult> Transfer([FromBody] TransferRequest request)
+    {
+        var currentUserPersonalData = await _personalDataGrpcService.GetByUserIdAsync(
+            new GetByUserIdPersonalDataByIdGrpcRequest
+            {
+                UserId = HttpContext.GetUserId()
+            });
+        var fromBankAccount = await _bankAccountGrpcService.GetByIdAsync(new GetBankAccountByIdGrpcRequest
+        {
+            BankAccountId = Guid.Parse(request.FromBankAccountId)
+        });
+        var toBankAccount = await _bankAccountGrpcService.GetByIdAsync(new GetBankAccountByIdGrpcRequest
+        {
+            BankAccountId = Guid.Parse(request.ToBankAccountId)
+        });
+
+        if (currentUserPersonalData.PersonalData == null)
+        {
+            var response = new DepositResponse { Status = currentUserPersonalData.GrpcResponse.Status.ToString() };
+
+            return new JsonResult(response)
+            {
+                StatusCode = currentUserPersonalData.GrpcResponse.Status.ToHttpCode()
+            };
+        }
+
+        if (fromBankAccount.BankAccount == null)
+        {
+            var response = new DepositResponse { Status = fromBankAccount.GrpcResponse.Status.ToString() };
+
+            return new JsonResult(response)
+            {
+                StatusCode = fromBankAccount.GrpcResponse.Status.ToHttpCode()
+            };
+        }
+
+        if (toBankAccount.BankAccount == null)
+        {
+            var response = new DepositResponse { Status = toBankAccount.GrpcResponse.Status.ToString() };
+
+            return new JsonResult(response)
+            {
+                StatusCode = toBankAccount.GrpcResponse.Status.ToHttpCode()
+            };
+        }
+
+        if (currentUserPersonalData.PersonalData.Id != fromBankAccount.BankAccount.PersonalDataId)
+        {
+            var response = new DepositResponse { Status = GrpcResponseStatus.Invalid.ToString() };
+
+            return new JsonResult(response)
+            {
+                StatusCode = GrpcResponseStatus.Invalid.ToHttpCode()
+            };
+        }
+
+        var grpcResponse = await _bankAccountGrpcService.TransferFundsAsync(request.ToGrpcRequest());
+
+        return new JsonResult(new TransferResponse { Status = grpcResponse.GrpcResponse.Status.ToString() })
         {
             StatusCode = grpcResponse.GrpcResponse.Status.ToHttpCode()
         };

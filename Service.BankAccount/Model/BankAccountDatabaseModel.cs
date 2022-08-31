@@ -11,6 +11,11 @@ public class BankAccountDatabaseModel
     public decimal Balance { get; }
     public DateOnly ExpireAt { get; }
 
+    public BankAccountDatabaseModel()
+    {
+        CurrencyCode = string.Empty;
+    }
+
     public BankAccountDatabaseModel(Guid id, Guid personalDataId, string currencyCode, decimal balance,
         DateOnly expireAt)
     {

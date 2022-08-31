@@ -15,6 +15,8 @@ public class CreateBankAccounts : FluentMigrator.Migration
             .WithColumn("currency_code").AsString(3).NotNullable()
             .WithColumn("balance").AsDecimal(22, 6).NotNullable()
             .WithColumn("expire_at").AsDate().NotNullable();
+
+        Execute.Sql($"ALTER TABLE {TableName} ADD CONSTRAINT BalanceGreaterThan0 CHECK(balance >= 0)");
     }
 
     public override void Down()
