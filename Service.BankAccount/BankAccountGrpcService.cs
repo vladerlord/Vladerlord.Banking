@@ -24,12 +24,23 @@ public class BankAccountGrpcService : IBankAccountGrpcService
 
     public async Task<CreateBankAccountGrpcResponse> CreateAsync(CreateBankAccountGrpcRequest request)
     {
-        var databaseModel = await _bankAccountRepository.CreateAsync(request.ToDatabaseModel(0m));
+        var status = GrpcResponseStatus.Ok;
+        BankAccountDatabaseModel? bankAccount = null;
+
+        try
+        {
+            bankAccount = await _bankAccountRepository.CreateAsync(request.ToDatabaseModel(0m));
+        }
+        catch (Exception e)
+        {
+            _logger.LogCritical("{Error}", e.ToString());
+            status = GrpcResponseStatus.Error;
+        }
 
         return new CreateBankAccountGrpcResponse
         {
-            GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
-            BankAccount = databaseModel.ToGrpcModel()
+            GrpcResponse = new GrpcResponse { Status = status },
+            BankAccount = bankAccount?.ToGrpcModel()
         };
     }
 
@@ -50,6 +61,8 @@ public class BankAccountGrpcService : IBankAccountGrpcService
     public async Task<AddFundsGrpcResponse> AddFundsAsync(AddFundsGrpcRequest request)
     {
         var bankAccount = await _bankAccountRepository.FindByIdAsync(request.BankAccountId);
+        var amount = request.Amount;
+        var status = GrpcResponseStatus.Ok;
 
         if (bankAccount == null)
         {
@@ -58,8 +71,6 @@ public class BankAccountGrpcService : IBankAccountGrpcService
                 GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.BankAccountNotFound }
             };
         }
-
-        var amount = request.Amount;
 
         if (bankAccount.CurrencyCode != request.Currency)
         {
@@ -84,11 +95,19 @@ public class BankAccountGrpcService : IBankAccountGrpcService
         _logger.LogInformation("Trying to add funds to: {BankAccountId}, amount: {Amount}, currency: {RequestCurrency}",
             bankAccount.Id, amount, request.Currency);
 
-        await _bankAccountRepository.AddToBalanceAsync(bankAccount.Id, amount);
+        try
+        {
+            await _bankAccountRepository.AddToBalanceAsync(bankAccount.Id, amount);
+        }
+        catch (Exception e)
+        {
+            _logger.LogCritical("Add funds error: {Error}", e.ToString());
+            status = GrpcResponseStatus.Error;
+        }
 
         return new AddFundsGrpcResponse
         {
-            GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok }
+            GrpcResponse = new GrpcResponse { Status = status }
         };
     }
 

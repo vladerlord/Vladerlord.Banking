@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Currency.Tests", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Identity.Tests", "Service.Identity.Tests\Service.Identity.Tests.csproj", "{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.BankAccount.Tests", "Service.BankAccount.Tests\Service.BankAccount.Tests.csproj", "{F7368FA1-90EC-4A6C-94D7-3DC18847838A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,9 +106,14 @@ Global
 		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7368FA1-90EC-4A6C-94D7-3DC18847838A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7368FA1-90EC-4A6C-94D7-3DC18847838A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7368FA1-90EC-4A6C-94D7-3DC18847838A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7368FA1-90EC-4A6C-94D7-3DC18847838A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CF9B3EA4-0C29-45DD-968F-999E24C44AA5} = {B77AD95B-342F-4E7F-9BE0-10AEADCCDA46}
 		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E} = {B77AD95B-342F-4E7F-9BE0-10AEADCCDA46}
+		{F7368FA1-90EC-4A6C-94D7-3DC18847838A} = {B77AD95B-342F-4E7F-9BE0-10AEADCCDA46}
 	EndGlobalSection
 EndGlobal
