@@ -15,8 +15,4 @@
         <ProjectReference Include="..\Shared.Abstractions\Shared.Abstractions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services" />
-    </ItemGroup>
-
 </Project>

@@ -2,6 +2,7 @@ using MassTransit;
 using Npgsql;
 using Service.Identity.Abstractions;
 using Service.Identity.Models;
+using Service.Identity.Scheme;
 using Service.Identity.Services;
 using Shared.Abstractions;
 using Shared.Grpc;
@@ -80,10 +81,10 @@ public class IdentityGrpcService : IIdentityGrpcService
         }
         catch (PostgresException e)
         {
-            // todo, check that field is email
-            status = e.SqlState == PostgresErrorCodes.UniqueViolation
-                ? GrpcResponseStatus.UserAlreadyExist
-                : GrpcResponseStatus.Error;
+            var emailViolation = e.SqlState == PostgresErrorCodes.UniqueViolation &&
+                                 e.ConstraintName?.Contains(UserDatabaseSchema.Columns.Email) == true;
+
+            status = emailViolation ? GrpcResponseStatus.UserAlreadyExist : GrpcResponseStatus.Error;
         }
         catch (Exception)
         {

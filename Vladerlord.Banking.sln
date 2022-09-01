@@ -32,6 +32,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B77AD95B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Currency.Tests", "Service.Currency.Tests\Service.Currency.Tests.csproj", "{CF9B3EA4-0C29-45DD-968F-999E24C44AA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Identity.Tests", "Service.Identity.Tests\Service.Identity.Tests.csproj", "{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,8 +100,13 @@ Global
 		{CF9B3EA4-0C29-45DD-968F-999E24C44AA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF9B3EA4-0C29-45DD-968F-999E24C44AA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF9B3EA4-0C29-45DD-968F-999E24C44AA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CF9B3EA4-0C29-45DD-968F-999E24C44AA5} = {B77AD95B-342F-4E7F-9BE0-10AEADCCDA46}
+		{953053EF-BBC4-4E88-9DFB-F5DEA6055B5E} = {B77AD95B-342F-4E7F-9BE0-10AEADCCDA46}
 	EndGlobalSection
 EndGlobal
