@@ -66,5 +66,4 @@ void BindAppServices(IServiceCollection services)
 {
     services.AddScoped<ICurrencyExchanger, DatabaseCurrencyExchanger>();
     services.AddScoped<ICurrencyRateUpdater, MockCurrencyRateUpdater>();
-    services.AddScoped<CurrencyService>();
 }
