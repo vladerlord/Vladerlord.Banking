@@ -44,7 +44,7 @@ public class BankAccountGrpcServiceTest
             CurrencyCode = currency,
             ExpireAt = expireAt
         };
-        var bankAccountModel = new BankAccountDatabaseModel(id, personalDataId, currency, 0m, DateOnly.Parse(expireAt));
+        var bankAccountModel = new BankAccountDatabaseModel(id, personalDataId, currency, 0m, expireAt);
 
         _bankAccountRepository
             .Setup(r => r.CreateAsync(It.IsAny<BankAccountDatabaseModel>()))
@@ -102,7 +102,7 @@ public class BankAccountGrpcServiceTest
         var personalDataId = Guid.NewGuid();
         const string currency = "USD";
         const string expireAt = "24.03.2024";
-        var bankAccountModel = new BankAccountDatabaseModel(id, personalDataId, currency, 0m, DateOnly.Parse(expireAt));
+        var bankAccountModel = new BankAccountDatabaseModel(id, personalDataId, currency, 0m, expireAt);
         var request = new GetBankAccountByIdGrpcRequest
         {
             BankAccountId = id,
@@ -161,8 +161,9 @@ public class BankAccountGrpcServiceTest
         const decimal amount = 10m;
         const string currency = "USD";
         const string expireAt = "24.03.2024";
+
         var bankAccount =
-            new BankAccountDatabaseModel(bankAccountId, personalDataId, currency, 0m, DateOnly.Parse(expireAt));
+            new BankAccountDatabaseModel(bankAccountId, personalDataId, currency, 0m, expireAt);
         var request = new AddFundsGrpcRequest
         {
             BankAccountId = bankAccountId,
@@ -193,7 +194,7 @@ public class BankAccountGrpcServiceTest
         const string toCurrency = "UAH";
         const string expireAt = "24.03.2024";
         var bankAccount =
-            new BankAccountDatabaseModel(bankAccountId, personalDataId, toCurrency, 0m, DateOnly.Parse(expireAt));
+            new BankAccountDatabaseModel(bankAccountId, personalDataId, toCurrency, 0m, expireAt);
         var request = new AddFundsGrpcRequest
         {
             BankAccountId = bankAccountId,
@@ -234,7 +235,7 @@ public class BankAccountGrpcServiceTest
         const string currency = "USD";
         const string expireAt = "24.03.2024";
         var bankAccount =
-            new BankAccountDatabaseModel(bankAccountId, personalDataId, currency, 0m, DateOnly.Parse(expireAt));
+            new BankAccountDatabaseModel(bankAccountId, personalDataId, currency, 0m, expireAt);
         var request = new TakeFundsGrpcRequest
         {
             BankAccountId = bankAccountId,
@@ -265,7 +266,7 @@ public class BankAccountGrpcServiceTest
         const string toCurrency = "UAH";
         const string expireAt = "24.03.2024";
         var bankAccount =
-            new BankAccountDatabaseModel(bankAccountId, personalDataId, toCurrency, 0m, DateOnly.Parse(expireAt));
+            new BankAccountDatabaseModel(bankAccountId, personalDataId, toCurrency, 0m, expireAt);
         var request = new TakeFundsGrpcRequest
         {
             BankAccountId = bankAccountId,
@@ -315,10 +316,9 @@ public class BankAccountGrpcServiceTest
             ToBankAccountId = toBankAccountId,
             Amount = amount
         };
-        var fromBankAccount = new BankAccountDatabaseModel(fromBankAccountId, fromPersonalDataId, fromCurrency, 0,
-            DateOnly.Parse(expireAt));
-        var toBankAccount = new BankAccountDatabaseModel(toBankAccountId, toPersonalDataId, toCurrency, 0,
-            DateOnly.Parse(expireAt));
+        var fromBankAccount =
+            new BankAccountDatabaseModel(fromBankAccountId, fromPersonalDataId, fromCurrency, 0, expireAt);
+        var toBankAccount = new BankAccountDatabaseModel(toBankAccountId, toPersonalDataId, toCurrency, 0, expireAt);
 
         _bankAccountRepository.Setup(r => r.FindByIdAsync(fromBankAccountId))
             .Returns(Task.FromResult<BankAccountDatabaseModel?>(fromBankAccount));
@@ -358,10 +358,9 @@ public class BankAccountGrpcServiceTest
             GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
             Amount = exchangedAmount
         };
-        var fromBankAccount = new BankAccountDatabaseModel(fromBankAccountId, fromPersonalDataId, fromCurrency, 0,
-            DateOnly.Parse(expireAt));
-        var toBankAccount = new BankAccountDatabaseModel(toBankAccountId, toPersonalDataId, toCurrency, 0,
-            DateOnly.Parse(expireAt));
+        var fromBankAccount =
+            new BankAccountDatabaseModel(fromBankAccountId, fromPersonalDataId, fromCurrency, 0, expireAt);
+        var toBankAccount = new BankAccountDatabaseModel(toBankAccountId, toPersonalDataId, toCurrency, 0, expireAt);
 
         _bankAccountRepository.Setup(r => r.FindByIdAsync(fromBankAccountId))
             .Returns(Task.FromResult<BankAccountDatabaseModel?>(fromBankAccount));

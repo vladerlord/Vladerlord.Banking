@@ -1,0 +1,23 @@
+version: "3.5"
+services:
+  serviceIdentity:
+    image: service-identity:latest
+    ports:
+      - "80:5074"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      IDENTITY_DB_CONNECTION: "Host=identityDb;Username=user;Password=password;Database=identity"
+      SECURITY_JWT_SECRET: "XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=="
+      SECURITY_JWT_EXPIRATION_MINUTES: "320"
+      RABBITMQ_HOST: "localhost"
+      RABBITMQ_USER: "user"
+      RABBITMQ_PASSWORD: "password"
+    networks:
+      - databasesNetwork
+  
+  serviceIdentityTests:
+    image: service-identity-tests:latest
+
+networks:
+  databasesNetwork:
+    external: true

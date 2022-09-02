@@ -1,3 +1,4 @@
+using System.Globalization;
 using Shared.Grpc.BankAccount.Contract;
 using Shared.Grpc.BankAccount.Model;
 
@@ -17,13 +18,13 @@ public class BankAccountDatabaseModel
     }
 
     public BankAccountDatabaseModel(Guid id, Guid personalDataId, string currencyCode, decimal balance,
-        DateOnly expireAt)
+        string expireAt)
     {
         Id = id;
         PersonalDataId = personalDataId;
         CurrencyCode = currencyCode;
         Balance = balance;
-        ExpireAt = expireAt;
+        ExpireAt = DateOnly.ParseExact(expireAt, "dd.MM.yyyy", CultureInfo.InvariantCulture);
     }
 
     public BankAccountGrpcModel ToGrpcModel()
@@ -34,7 +35,7 @@ public class BankAccountDatabaseModel
             PersonalDataId = PersonalDataId,
             CurrencyCode = CurrencyCode,
             Balance = Balance,
-            ExpireAt = ExpireAt.ToString()
+            ExpireAt = ExpireAt.ToString("dd.MM.yyyy")
         };
     }
 }
@@ -48,7 +49,7 @@ public static class BankAccountDatabaseModelExtension
             request.PersonalDataId,
             request.CurrencyCode,
             balance,
-            request.ExpireAtProperty
+            request.ExpireAt
         );
     }
 }

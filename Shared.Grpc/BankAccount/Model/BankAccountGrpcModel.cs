@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Shared.Grpc.BankAccount.Model;
@@ -11,11 +12,7 @@ public class BankAccountGrpcModel
     [DataMember(Order = 4)] public decimal Balance { get; init; }
     [DataMember(Order = 5)] public string ExpireAt { get; init; }
 
-    public DateOnly ExpireAtProperty
-    {
-        get => DateOnly.Parse(ExpireAt);
-        init => ExpireAt = value.ToString();
-    }
+    public DateOnly ExpireAtProperty => DateOnly.ParseExact(ExpireAt, "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
     public BankAccountGrpcModel()
     {

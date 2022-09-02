@@ -23,7 +23,7 @@ public class CreateRequest
         {
             PersonalDataId = personalDataId,
             CurrencyCode = CurrencyCode,
-            ExpireAtProperty = DateOnly.Parse(ExpireAt)
+            ExpireAt = ExpireAt
         };
     }
 }

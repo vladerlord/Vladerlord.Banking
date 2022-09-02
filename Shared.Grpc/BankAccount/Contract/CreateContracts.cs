@@ -10,12 +10,6 @@ public class CreateBankAccountGrpcRequest
     [DataMember(Order = 2)] public string CurrencyCode { get; init; }
     [DataMember(Order = 3)] public string ExpireAt { get; init; }
 
-    public DateOnly ExpireAtProperty
-    {
-        get => DateOnly.Parse(ExpireAt);
-        init => ExpireAt = value.ToString();
-    }
-
     public CreateBankAccountGrpcRequest()
     {
         CurrencyCode = string.Empty;
