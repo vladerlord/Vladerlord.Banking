@@ -5,15 +5,15 @@ using Shared.Grpc.PersonalData.Contracts;
 
 namespace Service.PersonalData.Services;
 
-public class PersonalDataService
+public class PersonalDataService : IPersonalDataService
 {
     private readonly IPersonalDataRepository _personalDataRepository;
-    private readonly KycScansService _kycScansService;
+    private readonly IKycScansService _kycScansService;
     private readonly EncryptionService _encryptionService;
-    private readonly PersonalDataEncryptionService _personalDataEncryptionService;
+    private readonly IPersonalDataEncryptionService _personalDataEncryptionService;
 
-    public PersonalDataService(IPersonalDataRepository personalDataRepository, KycScansService kycScansService,
-        EncryptionService encryptionService, PersonalDataEncryptionService personalDataEncryptionService)
+    public PersonalDataService(IPersonalDataRepository personalDataRepository, IKycScansService kycScansService,
+        EncryptionService encryptionService, IPersonalDataEncryptionService personalDataEncryptionService)
     {
         _personalDataRepository = personalDataRepository;
         _kycScansService = kycScansService;

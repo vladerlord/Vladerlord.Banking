@@ -1,8 +1,9 @@
+using Service.PersonalData.Abstractions;
 using Service.PersonalData.Models;
 
 namespace Service.PersonalData.Services;
 
-public class PersonalDataEncryptionService
+public class PersonalDataEncryptionService : IPersonalDataEncryptionService
 {
     private readonly EncryptionService _encryptionService;
 

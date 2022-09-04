@@ -1,13 +1,14 @@
+using Service.PersonalData.Abstractions;
 using Service.PersonalData.Models;
 using Shared.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData.Services;
 
-public class KycScansFileService
+public class LocalKycScansFileService : IKycScansFileExplorer
 {
     private readonly string _scansFolderPath;
 
-    public KycScansFileService(string scansFolderPath)
+    public LocalKycScansFileService(string scansFolderPath)
     {
         _scansFolderPath = scansFolderPath;
     }

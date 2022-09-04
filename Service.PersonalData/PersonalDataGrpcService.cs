@@ -1,79 +1,119 @@
+using Service.PersonalData.Abstractions;
 using Service.PersonalData.Exceptions;
 using Service.PersonalData.Models;
-using Service.PersonalData.Services;
 using Shared.Grpc;
 using Shared.Grpc.PersonalData;
 using Shared.Grpc.PersonalData.Contracts;
+using Shared.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData;
 
 public class PersonalDataGrpcService : IPersonalDataGrpcService
 {
-    private readonly PersonalDataService _personalDataService;
-    private readonly KycScansService _kycScansService;
+    private readonly IPersonalDataService _personalDataService;
+    private readonly IKycScansService _kycScansService;
+    private readonly ILogger<PersonalDataGrpcService> _logger;
 
-    public PersonalDataGrpcService(PersonalDataService personalDataService, KycScansService kycScansService)
+    public PersonalDataGrpcService(IPersonalDataService personalDataService, IKycScansService kycScansService,
+        ILogger<PersonalDataGrpcService> logger)
     {
         _personalDataService = personalDataService;
         _kycScansService = kycScansService;
+        _logger = logger;
     }
 
     public async Task<ApplyPersonalDataGrpcResponse> ApplyPersonalDataAsync(ApplyPersonalDataGrpcRequest request)
     {
-        var existentPersonalData = await _personalDataService.FindByUserId(request.PersonalData.UserId);
+        try
+        {
+            var existentPersonalData = await _personalDataService.FindByUserId(request.PersonalData.UserId);
 
-        if (existentPersonalData == null)
+
+            if (existentPersonalData == null)
+                return new ApplyPersonalDataGrpcResponse
+                {
+                    GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
+                };
+
+            switch (existentPersonalData.Status)
+            {
+                case PersonalDataStatus.PendingApproval:
+                    return new ApplyPersonalDataGrpcResponse
+                    {
+                        GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyInProcess },
+                        PersonalData = existentPersonalData.ToGrpcModel()
+                    };
+                case PersonalDataStatus.Approved:
+                    return new ApplyPersonalDataGrpcResponse
+                    {
+                        GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyApproved }
+                    };
+                case PersonalDataStatus.Declined:
+                default:
+                {
+                    var personalData = await _personalDataService.ApplyPersonalDataAsync(request);
+
+                    return new ApplyPersonalDataGrpcResponse
+                    {
+                        GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
+                        PersonalData = personalData.ToGrpcModel()
+                    };
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error when applying user id: {UserId}. Error: {Error}", request.PersonalData.UserId,
+                e.ToString());
+
             return new ApplyPersonalDataGrpcResponse
             {
-                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error }
             };
-
-        switch (existentPersonalData.Status)
-        {
-            case PersonalDataStatus.PendingApproval:
-                return new ApplyPersonalDataGrpcResponse
-                {
-                    GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyInProcess },
-                    PersonalData = existentPersonalData.ToGrpcModel()
-                };
-            case PersonalDataStatus.Approved:
-                return new ApplyPersonalDataGrpcResponse
-                {
-                    GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyApproved }
-                };
-            case PersonalDataStatus.Declined:
-            default:
-            {
-                var personalData = await _personalDataService.ApplyPersonalDataAsync(request);
-
-                return new ApplyPersonalDataGrpcResponse
-                {
-                    GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
-                    PersonalData = personalData.ToGrpcModel()
-                };
-            }
         }
     }
 
     public async Task<ListAllUnapprovedPersonalDataGrpcResponse> ListAllUnapprovedPersonalDataAsync()
     {
-        var list = await _personalDataService.GetUnapprovedAsync();
-        var result = list.Select(personalDataDatabaseModel => personalDataDatabaseModel.ToGrpcModel()).ToList();
-
-        return new ListAllUnapprovedPersonalDataGrpcResponse
+        try
         {
-            GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
-            PersonalDataList = result
-        };
+            var list = await _personalDataService.GetUnapprovedAsync();
+            var result = list.Select(personalDataDatabaseModel => personalDataDatabaseModel.ToGrpcModel()).ToList();
+
+            return new ListAllUnapprovedPersonalDataGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
+                PersonalDataList = result
+            };
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{Error}", e.ToString());
+
+            return new ListAllUnapprovedPersonalDataGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error },
+                PersonalDataList = new List<PersonalDataGrpcModel>()
+            };
+        }
     }
 
     public async Task<GetPersonalDataByIdGrpcResponse> GetByIdAsync(GetPersonalDataByIdGrpcRequest request)
     {
-        PersonalDataDatabaseModel personalData;
-
         try
         {
-            personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var kycScans = await _kycScansService.GetAllByPersonalData(personalData);
+            var kycScansIds = kycScans.Select(kycScanGrpcModel => kycScanGrpcModel.FileName).ToList();
+
+            var response = new GetPersonalDataByIdGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
+                PersonalData = personalData.ToGrpcModel(),
+                KycScansIds = kycScansIds
+            };
+
+            return response;
         }
         catch (PersonalDataNotFoundException)
         {
@@ -82,42 +122,59 @@ public class PersonalDataGrpcService : IPersonalDataGrpcService
                 GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
             };
         }
-
-        var kycScans = await _kycScansService.GetAllByPersonalData(personalData);
-        var kycScansIds = kycScans.Select(kycScanGrpcModel => kycScanGrpcModel.FileName).ToList();
-
-        var response = new GetPersonalDataByIdGrpcResponse
+        catch (Exception e)
         {
-            GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
-            PersonalData = personalData.ToGrpcModel(),
-            KycScansIds = kycScansIds
-        };
+            _logger.LogError("Error when trying to get by id: {Id}. Error: {Error}", request.PersonalDataId,
+                e.ToString());
 
-        return response;
+            return new GetPersonalDataByIdGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error }
+            };
+        }
     }
 
     public async Task<GetByUserIdPersonalDataByIdGrpcResponse> GetByUserIdAsync(
         GetByUserIdPersonalDataByIdGrpcRequest request)
     {
-        var personalData = await _personalDataService.FindByUserId(request.UserId);
-
-        return new GetByUserIdPersonalDataByIdGrpcResponse
+        try
         {
-            GrpcResponse = new GrpcResponse
+            var personalData = await _personalDataService.FindByUserId(request.UserId);
+
+            return new GetByUserIdPersonalDataByIdGrpcResponse
             {
-                Status = personalData != null ? GrpcResponseStatus.Ok : GrpcResponseStatus.NotFound
-            },
-            PersonalData = personalData?.ToGrpcModel()
-        };
+                GrpcResponse = new GrpcResponse
+                {
+                    Status = personalData != null ? GrpcResponseStatus.Ok : GrpcResponseStatus.NotFound
+                },
+                PersonalData = personalData?.ToGrpcModel()
+            };
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("User id: {UserId}. Error: {Error}", request.UserId, e.ToString());
+
+            return new GetByUserIdPersonalDataByIdGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error },
+            };
+        }
     }
 
     public async Task<ApprovePersonalDataGrpcResponse> ApprovePersonalDataAsync(ApprovePersonalDataGrpcRequest request)
     {
-        PersonalDataDatabaseModel personalData;
-
         try
         {
-            personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var result = await _personalDataService.Approve(personalData);
+
+            return new ApprovePersonalDataGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse
+                {
+                    Status = result ? GrpcResponseStatus.Ok : GrpcResponseStatus.AlreadyChanged
+                }
+            };
         }
         catch (PersonalDataNotFoundException)
         {
@@ -126,25 +183,31 @@ public class PersonalDataGrpcService : IPersonalDataGrpcService
                 GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
             };
         }
-
-        var result = await _personalDataService.Approve(personalData);
-
-        return new ApprovePersonalDataGrpcResponse
+        catch (Exception e)
         {
-            GrpcResponse = new GrpcResponse
+            _logger.LogError("Approve: {Id}. Error: {Error}", request.PersonalDataId, e.ToString());
+
+            return new ApprovePersonalDataGrpcResponse
             {
-                Status = result ? GrpcResponseStatus.Ok : GrpcResponseStatus.AlreadyChanged
-            }
-        };
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error }
+            };
+        }
     }
 
     public async Task<DeclinePersonalDataGrpcResponse> DeclinePersonalDataAsync(DeclinePersonalDataGrpcRequest request)
     {
-        PersonalDataDatabaseModel personalData;
-
         try
         {
-            personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var personalData = await _personalDataService.GetByIdAsync(request.PersonalDataId);
+            var result = await _personalDataService.Decline(personalData);
+
+            return new DeclinePersonalDataGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse
+                {
+                    Status = result ? GrpcResponseStatus.Ok : GrpcResponseStatus.AlreadyChanged
+                }
+            };
         }
         catch (PersonalDataNotFoundException)
         {
@@ -153,15 +216,14 @@ public class PersonalDataGrpcService : IPersonalDataGrpcService
                 GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
             };
         }
-
-        var result = await _personalDataService.Decline(personalData);
-
-        return new DeclinePersonalDataGrpcResponse
+        catch (Exception e)
         {
-            GrpcResponse = new GrpcResponse
+            _logger.LogError("Decline: {Id}. Error: {Error}", request.PersonalDataId, e.ToString());
+
+            return new DeclinePersonalDataGrpcResponse
             {
-                Status = result ? GrpcResponseStatus.Ok : GrpcResponseStatus.AlreadyChanged
-            }
-        };
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Error }
+            };
+        }
     }
 }

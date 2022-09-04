@@ -5,19 +5,19 @@ using Shared.Grpc.PersonalData.Models;
 
 namespace Service.PersonalData.Services;
 
-public class KycScansService
+public class KycScansService : IKycScansService
 {
-    private readonly KycScansFileService _kycScansFileService;
+    private readonly IKycScansFileExplorer _kycScansFileExplorer;
     private readonly IKycScanRepository _kycScanRepository;
     private readonly KycScanEncryptionService _kycScanEncryptionService;
 
     public KycScansService(
-        KycScansFileService kycScansFileService,
+        IKycScansFileExplorer kycScansFileExplorer,
         IKycScanRepository kycScanRepository,
         KycScanEncryptionService kycScanEncryptionService
     )
     {
-        _kycScansFileService = kycScansFileService;
+        _kycScansFileExplorer = kycScansFileExplorer;
         _kycScanRepository = kycScanRepository;
 
         _kycScanEncryptionService = kycScanEncryptionService;
@@ -31,7 +31,7 @@ public class KycScansService
 
             _kycScanEncryptionService.EncryptCreateGrpcModel(kycScanCreateModel, personalData.Iv);
 
-            await _kycScansFileService.SaveKycScan(kycScanCreateModel, kycScanDatabaseModel.FileName.ToString());
+            await _kycScansFileExplorer.SaveKycScan(kycScanCreateModel, kycScanDatabaseModel.FileName.ToString());
             await _kycScanRepository.CreateAsync(kycScanDatabaseModel);
         }
     }
@@ -41,7 +41,7 @@ public class KycScansService
         var kycScans = await _kycScanRepository.GetByPersonalDataIdAsync(personalDataId);
 
         foreach (var kycScanDatabaseModel in kycScans)
-            _kycScansFileService.DeleteKycScan(kycScanDatabaseModel);
+            _kycScansFileExplorer.DeleteKycScan(kycScanDatabaseModel);
 
         await _kycScanRepository.DeleteByPersonalDataIdAsync(personalDataId);
     }
@@ -53,7 +53,7 @@ public class KycScansService
         if (kycScan == null)
             return null;
 
-        var content = await _kycScansFileService.GetKyсScanContentAsync(kycScan);
+        var content = await _kycScansFileExplorer.GetKyсScanContentAsync(kycScan);
         var result = kycScan.ToGrpcModel(content);
 
         try
@@ -75,7 +75,7 @@ public class KycScansService
 
         foreach (var kycScanDatabaseModel in kycScans)
         {
-            var content = await _kycScansFileService.GetKyсScanContentAsync(kycScanDatabaseModel);
+            var content = await _kycScansFileExplorer.GetKyсScanContentAsync(kycScanDatabaseModel);
             var grpcModel = kycScanDatabaseModel.ToGrpcModel(content);
 
             _kycScanEncryptionService.DecryptGrpcModel(grpcModel, personalData.Iv);

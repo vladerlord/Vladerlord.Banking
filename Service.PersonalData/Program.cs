@@ -53,9 +53,9 @@ void BindAppServices(IServiceCollection services)
     var encryptionKey = EnvironmentUtils.GetRequiredEnvironmentVariable("SECURITY_ENCRYPTION_KEY");
 
     services.AddSingleton(new EncryptionService(encryptionKey));
-    services.AddScoped(_ => new KycScansFileService(scansFolder));
-    services.AddScoped<KycScansService>();
-    services.AddScoped<PersonalDataService>();
-    services.AddScoped<PersonalDataEncryptionService>();
+    services.AddScoped<IKycScansFileExplorer, LocalKycScansFileService>(_ => new LocalKycScansFileService(scansFolder));
+    services.AddScoped<IKycScansService, KycScansService>();
+    services.AddScoped<IPersonalDataService, PersonalDataService>();
+    services.AddScoped<IPersonalDataEncryptionService, PersonalDataEncryptionService>();
     services.AddScoped<KycScanEncryptionService>();
 }
