@@ -14,6 +14,7 @@ using Shared.Grpc.PersonalData;
 var builder = WebApplication.CreateBuilder(args);
 
 StartupUtils.ConfigureLogging(builder);
+builder.Services.ConfigureOpenTelemetry();
 
 builder.Services
     .AddControllers(options =>

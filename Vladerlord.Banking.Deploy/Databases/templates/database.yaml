@@ -37,6 +37,8 @@ spec:
       app: {{ $database.name }}
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: {{ $database.name }}
     spec:

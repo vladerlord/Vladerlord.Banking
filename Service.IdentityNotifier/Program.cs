@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using Chassis;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,11 +7,7 @@ using Serilog;
 using Service.IdentityNotifier;
 using Service.IdentityNotifier.Subscribers;
 
-var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-if (environment == null)
-    throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
-
+var environment = EnvironmentUtils.GetRequiredEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var isDevelopment = environment.ToLower().Equals("development");
 
 if (isDevelopment)
@@ -39,6 +36,7 @@ var builder = Host.CreateDefaultBuilder(args)
         ConfigureMasstransit(services);
 
         services.AddSingleton<RazorTemplateRenderer>();
+        services.ConfigureOpenTelemetry();
     });
 
 var app = builder.Build();

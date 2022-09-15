@@ -8,6 +8,9 @@ deployments:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5077
       CURRENCY_DB_CONNECTION: "Host={{ .Values.databases.currency.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.currency.servicePort }};Username={{ .Values.secrets.databases.currency.user }};Password={{ .Values.secrets.databases.currency.password }};Database={{ .Values.databases.currency.database }}"
+    envFrom:
+      - configMapRef:
+          name: chassis-values
   - name: service-identity
     image: vladerlord/vladerlord.banking.service.identity:latest
     imagePullPolicy: Always
@@ -17,24 +20,30 @@ deployments:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5074
       IDENTITY_DB_CONNECTION: "Host={{ .Values.databases.identity.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.identity.servicePort }};Username={{ .Values.secrets.databases.identity.user }};Password={{ .Values.secrets.databases.identity.password }};Database={{ .Values.databases.identity.database }}"
-      SECURITY_JWT_SECRET: {{ .Values.secrets.banking.identity.jwtSecret }}
       SECURITY_JWT_EXPIRATION_MINUTES: "320"
       RABBITMQ_HOST: rabbitmq.{{ .Values.utils.rabbitmq.namespace }}.svc.cluster.local
-      RABBITMQ_USER: {{ .Values.secrets.utils.rabbitmq.username }}
-      RABBITMQ_PASSWORD: {{ .Values.secrets.utils.rabbitmq.password }}
+    envFrom:
+      - configMapRef:
+          name: chassis-values
+      - secretRef:
+          name: rabbitmq-credentials
+      - secretRef:
+          name: identity-jwt
   - name: service-identitynotifier
     image: vladerlord/vladerlord.banking.service.identitynotifier:latest
     imagePullPolicy: Always
     env:
       ASPNETCORE_ENVIRONMENT: Production
       RABBITMQ_HOST: rabbitmq.{{ .Values.utils.rabbitmq.namespace }}.svc.cluster.local
-      RABBITMQ_USER: {{ .Values.secrets.utils.rabbitmq.username }}
-      RABBITMQ_PASSWORD: {{ .Values.secrets.utils.rabbitmq.password }}
       SMTP_HOST: {{ .Values.secrets.banking.identityNotifier.smtpHost }}
       SMTP_PORT: {{ .Values.secrets.banking.identityNotifier.smtpPort }}
-      SMTP_USERNAME: {{ .Values.secrets.banking.identityNotifier.smtpUsername }}
-      SMTP_PASSWORD: {{ .Values.secrets.banking.identityNotifier.smtpPassword }}
-      SMTP_FROM: {{ .Values.secrets.banking.identityNotifier.smtpFrom }}
+    envFrom:
+      - configMapRef:
+          name: chassis-values
+      - secretRef:
+          name: rabbitmq-credentials
+      - secretRef:
+          name: banking-smtp-credentials
   - name: service-bankaccount
     image: vladerlord/vladerlord.banking.service.bankaccount:latest
     imagePullPolicy: Always
@@ -45,6 +54,9 @@ deployments:
       ASPNETCORE_URLS: http://+:5075
       BANK_ACCOUNT_DB_CONNECTION: "Host={{ .Values.databases.bankAccount.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.bankAccount.servicePort }};Username={{ .Values.secrets.databases.bankAccount.user }};Password={{ .Values.secrets.databases.bankAccount.password }};Database={{ .Values.databases.bankAccount.database }}"
       CURRENCY_GRPC: "http://service-currency-service:84"
+    envFrom:
+      - configMapRef:
+          name: chassis-values
   - name: service-personaldata
     image: vladerlord/vladerlord.banking.service.personaldata:latest
     imagePullPolicy: Always
@@ -56,6 +68,9 @@ deployments:
       PERSONAL_DATA_DB_CONNECTION: "Host={{ .Values.databases.personalData.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.personalData.servicePort }};Username={{ .Values.secrets.databases.personalData.user }};Password={{ .Values.secrets.databases.personalData.password }};Database={{ .Values.databases.personalData.database }}"
       IDENTITY_SCANS_VOLUME_FOLDER: "./Scans"
       SECURITY_ENCRYPTION_KEY: "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM="
+    envFrom:
+      - configMapRef:
+          name: chassis-values
   - name: gateway-root
     image: vladerlord/vladerlord.banking.gateway.root:latest
     imagePullPolicy: Always
@@ -69,6 +84,9 @@ deployments:
       BANK_ACCOUNT_GRPC: "http://service-bankaccount-service:82"
       CURRENCY_GRPC: "http://service-currency-service:84"
       DOMAIN: "https://{{ .Values.banking.appDomain }}/app"
+    envFrom:
+      - configMapRef:
+          name: chassis-values
 
 services:
   - app: service-currency
@@ -119,8 +137,13 @@ ingresses:
                   port:
                     number: 80
 
-{{ if .Values.banking.ingress.useLocalCerts }}
+configMaps:
+  - name: chassis-values
+    data:
+      OPENTELEMETRY_OTLP_URI: http://collector.{{ .Values.utils.linkerdJaeger.namespace }}.svc.cluster.local:4317
+
 secrets:
+  {{ if .Values.banking.ingress.useLocalCerts }}
   - name: wildcard-vladerlord-fun-tls
     namespace: {{ .Values.banking.namespace }}
     type: kubernetes.io/tls
@@ -129,7 +152,30 @@ secrets:
         file: clusterCerts/tls.crt
       - name: tls.key
         file: clusterCerts/tls.key
-{{ else }}
+  {{ end }}
+  - name: rabbitmq-credentials
+    type: Opaque
+    data:
+      - name: RABBITMQ_USER
+        value: {{ .Values.secrets.utils.rabbitmq.username }}
+      - name: RABBITMQ_PASSWORD
+        value: {{ .Values.secrets.utils.rabbitmq.password }}
+  - name: identity-jwt
+    type: Opaque
+    data:
+      - name: SECURITY_JWT_SECRET
+        value: {{ .Values.secrets.banking.identity.jwtSecret }}
+  - name: banking-smtp-credentials
+    type: Opaque
+    data:
+      - name: SMTP_USERNAME
+        value: {{ .Values.secrets.banking.identityNotifier.smtpUsername }}
+      - name: SMTP_PASSWORD
+        value: {{ .Values.secrets.banking.identityNotifier.smtpPassword }}
+      - name: SMTP_FROM
+        value: {{ .Values.secrets.banking.identityNotifier.smtpFrom }}
+
+{{ if not .Values.banking.ingress.useLocalCerts }}
 certificates:
   - name: wildcard-vladerlord-fun
     dnsNames:

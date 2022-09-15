@@ -21,3 +21,18 @@ createLinkerdNamespaces:
 
 sync:
 	helmfile -f ./Vladerlord.Banking.Deploy/helmfile.yaml -e production sync --concurrency 1
+
+buildAndPushImages:
+	docker build -t vladerlord/vladerlord.banking.service.currency:latest -f Service.Currency/Dockerfile .
+	docker build -t vladerlord/vladerlord.banking.service.identity:latest -f Service.Identity/Dockerfile .
+	docker build -t vladerlord/vladerlord.banking.service.identitynotifier:latest -f Service.IdentityNotifier/Dockerfile .
+	docker build -t vladerlord/vladerlord.banking.service.bankaccount:latest -f Service.BankAccount/Dockerfile .
+	docker build -t vladerlord/vladerlord.banking.service.personaldata:latest -f Service.PersonalData/Dockerfile .
+	docker build -t vladerlord/vladerlord.banking.gateway.root:latest -f Gateway.Root/Dockerfile .
+
+	docker push vladerlord/vladerlord.banking.service.currency:latest
+	docker push vladerlord/vladerlord.banking.service.identity:latest
+	docker push vladerlord/vladerlord.banking.service.identitynotifier:latest
+	docker push vladerlord/vladerlord.banking.service.bankaccount:latest
+	docker push vladerlord/vladerlord.banking.service.personaldata:latest
+	docker push vladerlord/vladerlord.banking.gateway.root:latest

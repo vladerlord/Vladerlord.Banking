@@ -14,6 +14,19 @@ spec:
   template:
     metadata:
       name: "{{ $deployment.name }}-pod"
+      annotations:
+        prometheus.io/scrape: "true"
+        linkerd.io/inject: enabled
+
+        {{ if $deployment.metricsPort }}
+        prometheus.io/port: "{{ $deployment.metricsPort }}"
+        {{ else }}
+        prometheus.io/port: "{{ $deployment.containerPort }}"
+        {{ end }}
+
+        {{ if $deployment.linkerdDebug }}
+        config.linkerd.io/enable-debug-sidecar: "true"
+        {{ end }}
       labels:
         app: "{{ $deployment.name }}-app"
     spec:
@@ -44,4 +57,9 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
             {{ end }}
+          
+          {{ if $deployment.envFrom }}
+          envFrom:
+          {{ toYaml $deployment.envFrom | nindent 10 }}
+          {{ end }}
 {{- end -}}

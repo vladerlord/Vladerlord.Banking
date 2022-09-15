@@ -1,3 +1,6 @@
 auth:
   username: {{ .Values.secrets.utils.rabbitmq.username }}
   password: {{ .Values.secrets.utils.rabbitmq.password }}
+
+podAnnotations:
+  linkerd.io/inject: enabled

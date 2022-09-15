@@ -17,6 +17,8 @@ AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 StartupUtils.ConfigureLogging(builder);
+builder.Services.ConfigureOpenTelemetry();
+
 Chassis.Grpc.StartupUtils.ConfigureDapperContextBuilder(builder, identityConnectionString);
 Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingBuilder(builder);
 Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, identityConnectionString,

@@ -28,38 +28,29 @@ public class PersonalDataGrpcService : IPersonalDataGrpcService
         {
             var existentPersonalData = await _personalDataService.FindByUserId(request.PersonalData.UserId);
 
-
-            if (existentPersonalData == null)
-                return new ApplyPersonalDataGrpcResponse
-                {
-                    GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.NotFound }
-                };
-
-            switch (existentPersonalData.Status)
+            if (existentPersonalData != null)
             {
-                case PersonalDataStatus.PendingApproval:
+                if (existentPersonalData.Status == PersonalDataStatus.PendingApproval)
                     return new ApplyPersonalDataGrpcResponse
                     {
                         GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyInProcess },
                         PersonalData = existentPersonalData.ToGrpcModel()
                     };
-                case PersonalDataStatus.Approved:
+
+                if (existentPersonalData.Status == PersonalDataStatus.Approved)
                     return new ApplyPersonalDataGrpcResponse
                     {
                         GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.AlreadyApproved }
                     };
-                case PersonalDataStatus.Declined:
-                default:
-                {
-                    var personalData = await _personalDataService.ApplyPersonalDataAsync(request);
-
-                    return new ApplyPersonalDataGrpcResponse
-                    {
-                        GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
-                        PersonalData = personalData.ToGrpcModel()
-                    };
-                }
             }
+
+            var personalData = await _personalDataService.ApplyPersonalDataAsync(request);
+
+            return new ApplyPersonalDataGrpcResponse
+            {
+                GrpcResponse = new GrpcResponse { Status = GrpcResponseStatus.Ok },
+                PersonalData = personalData.ToGrpcModel()
+            };
         }
         catch (Exception e)
         {

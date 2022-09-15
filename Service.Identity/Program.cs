@@ -17,6 +17,8 @@ AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 StartupUtils.ConfigureLogging(builder);
+builder.Services.ConfigureOpenTelemetry();
+
 Chassis.Grpc.StartupUtils.ConfigureDapperContextBuilder(builder, identityConnectionString);
 Chassis.Grpc.StartupUtils.ConfigurePostgresLoggingBuilder(builder);
 Chassis.Grpc.StartupUtils.ConfigureFluentMigratorBuilder(builder, identityConnectionString,
@@ -29,7 +31,7 @@ ConfigureRabbitmq();
 builder.WebHost.ConfigureKestrel(options =>
 {
     // metrics port
-    options.ListenAnyIP(5188, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+    options.ListenAnyIP(5500, o => o.Protocols = HttpProtocols.Http1AndHttp2);
     // grpc port, todo bind to env variable
     options.ListenAnyIP(5074, o => o.Protocols = HttpProtocols.Http2);
 });
