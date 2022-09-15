@@ -1,0 +1,21 @@
+controllerLogFormat: json
+installNamespace: false
+
+proxy:
+  logFormat: json
+proxyInit:
+  logFormat: json
+  
+policyValidator:
+  externalSecret: true
+
+proxyInjector:
+  externalSecret: true
+
+profileValidator:
+  externalSecret: true
+
+identity:
+  issuer:
+    scheme: kubernetes.io/tls
+    crtExpity: $(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")

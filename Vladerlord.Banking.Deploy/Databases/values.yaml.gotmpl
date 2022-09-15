@@ -1,0 +1,29 @@
+databases:
+  - name: currency
+    ns: {{ .Values.databases.namespace }}
+    service: {{ .Values.databases.currency.service }}
+    database: {{ .Values.databases.currency.database }}
+    user: {{ .Values.secrets.databases.currency.user }}
+    password: {{ .Values.secrets.databases.currency.password }}
+    servicePort: {{ .Values.databases.currency.servicePort }}
+  - name: identity
+    ns: {{ .Values.databases.namespace }}
+    service: {{ .Values.databases.identity.service }}
+    database: {{ .Values.databases.identity.database }}
+    user: {{ .Values.secrets.databases.identity.user }}
+    password: {{ .Values.secrets.databases.identity.password }}
+    servicePort: {{ .Values.databases.identity.servicePort }}
+  - name: personal-data
+    ns: {{ .Values.databases.namespace }}
+    service: {{ .Values.databases.personalData.service }}
+    database: {{ .Values.databases.personalData.database }}
+    user: {{ .Values.secrets.databases.personalData.user }}
+    password: {{ .Values.secrets.databases.personalData.password }}
+    servicePort: {{ .Values.databases.personalData.servicePort }}
+  - name: bank-account
+    ns: {{ .Values.databases.namespace }}
+    service: {{ .Values.databases.bankAccount.service }}
+    database: {{ .Values.databases.bankAccount.database }}
+    user: {{ .Values.secrets.databases.bankAccount.user }}
+    password: {{ .Values.secrets.databases.bankAccount.password }}
+    servicePort: {{ .Values.databases.bankAccount.servicePort }}

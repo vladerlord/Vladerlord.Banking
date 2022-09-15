@@ -1,0 +1,37 @@
+repositories:
+  - name: godaddy-webhook
+    url: git+https://github.com/vladerlord/godaddy-webhook@deploy/helm?ref=main
+
+environments:
+  production:
+    values:
+      - ./environment/production/values.yaml
+      - ./environment/production/secrets.yaml
+      - ./Databases/shared.values.yaml
+      - ./Utils/shared.values.yaml
+      - ./Dev/shared.values.yaml
+      - ./Banking/shared.values.yaml
+
+---
+bases:
+  - ./Utils/utils-releases.yaml
+  - ./Dev/dev-releases.yaml
+
+releases:
+  - name: banking-databases
+    namespace: {{ .Values.databases.namespace }}
+    chart: ./Databases
+    values:
+      - ./Databases/values.yaml.gotmpl
+  - name: banking
+    namespace: {{ .Values.banking.namespace }}
+    chart: ./Banking
+    labels: 
+      app: banking
+    values:
+      - ./Banking/values.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.linkerd.namespace }}/linkerd
+      - {{ .Values.utils.certManager.namespace }}/cert-manager
+      - {{ .Values.utils.ingressNginx.namespace }}/ingress-nginx
+

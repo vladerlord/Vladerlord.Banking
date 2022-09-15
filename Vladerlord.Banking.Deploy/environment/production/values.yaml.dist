@@ -1,0 +1,22 @@
+environment: "production"
+
+banking:
+  domain: "test.com"
+  appDomain: "app.test.com"
+  wildcardDomain: "*.test.com"
+  devDomain: "dev.test.com"
+  devAuthDomain: "oauth2.test.com"
+  acmeDomain: "acme.test.com"
+  ingress:
+    # if true
+    # tls.crt and tls.key under Vladerlord.Banking.Deploy/Banking/clusterCerts/ will be used
+    # without creating acme certificate
+    # useful in dev as acme has cert limits
+    useLocalCerts: false
+
+dev:
+  enableOauth: true
+
+utils:
+  letsencrypt:
+    isProduction: true

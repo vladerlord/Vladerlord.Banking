@@ -1,0 +1,20 @@
+databases:
+  namespace: databases
+
+  currency:
+    service: currency-database-svc
+    servicePort: 5435
+    database: currency
+  identity:
+    service: identity-database-svc
+    servicePort: 5432
+    database: identity
+  personalData:
+    service: personal-data-database-svc
+    servicePort: 5433
+    database: personal-data
+  bankAccount:
+    service: bank-account-database-svc
+    servicePort: 5434
+    database: bank-account
+

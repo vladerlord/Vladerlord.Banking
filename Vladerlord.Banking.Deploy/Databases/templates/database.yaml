@@ -1,0 +1,73 @@
+{{- range $database := .Values.databases }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ $database.ns }}
+  name: {{ $database.name }}-config
+  labels:
+    app: {{ $database.name }}
+data:
+  POSTGRES_DB: {{ $database.database }}
+  POSTGRES_USER: {{ $database.user }}
+  POSTGRES_PASSWORD: {{ $database.password }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: {{ $database.ns }}
+  name: {{ $database.name }}-claim
+  labels:
+    app: {{ $database.name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ $database.ns }}
+  name: {{ $database.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ $database.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $database.name }}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: {{ $database.name }}-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: {{ $database.name }}-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ $database.ns }}
+  name: {{ $database.service }}
+spec:
+#  type: LoadBalancer
+  ports:
+    - name: port
+      port: {{ $database.servicePort }}
+      targetPort: 5432
+  selector:
+    app: {{ $database.name }}
+{{- end -}}

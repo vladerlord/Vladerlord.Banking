@@ -1,0 +1,17 @@
+dev:
+  namespace: dev
+
+  oauth2:
+    namespace: dev
+
+  kibana:
+    namespace: dev
+
+  prometheus:
+    namespace: dev
+
+  elasticsearch:
+    namespace: dev
+  
+  fluentd:
+    namespace: dev

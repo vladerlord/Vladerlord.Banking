@@ -1,0 +1,3 @@
+controller:
+  extraArgs:
+    default-ssl-certificate: "banking/wildcard-vladerlord-fun-tls"

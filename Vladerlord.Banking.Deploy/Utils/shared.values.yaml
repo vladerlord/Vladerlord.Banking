@@ -1,0 +1,15 @@
+utils:
+  namespace: utils
+
+  ingressNginx:
+    namespace: ingress-nginx
+  certManager:
+    namespace: cert-manager
+  rabbitmq:
+    namespace: rabbitmq
+  linkerd:
+    namespace: linkerd
+  linkerdViz:
+    namespace: linkerd-viz
+  linkerdJaeger:
+    namespace: linkerd-jaeger

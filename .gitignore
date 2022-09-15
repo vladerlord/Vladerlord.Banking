@@ -16,4 +16,3 @@ deploy
 AuthGateway
 AuthGrpcService
 AuthShared
-AuthGateway.Dockerfile

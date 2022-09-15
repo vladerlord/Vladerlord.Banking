@@ -1,0 +1,11 @@
+elasticSearch:
+  username: {{ .Values.secrets.dev.elasticSearch.username }}
+  password: {{ .Values.secrets.dev.elasticSearch.username }}
+
+certificates:
+  - name: elasticsearch
+    isCA: true
+    issuerRef:
+      name: self-signed-issuer
+      kind: ClusterIssuer
+    commonName: {{ .Values.banking.devDomain }}

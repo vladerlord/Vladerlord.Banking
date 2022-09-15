@@ -1,0 +1,100 @@
+releases:
+  - name: ingress-nginx
+    namespace: {{ .Values.utils.ingressNginx.namespace }}
+    chart: ingress-nginx/ingress-nginx
+    version: 4.2.0
+    labels:
+      subChart: utils
+    values:
+      - ./Utils/values/ingress-nginx.yaml
+    needs:
+      - {{ .Values.utils.linkerd.namespace }}/linkerd
+    wait: true
+  - name: cert-manager
+    namespace: {{ .Values.utils.certManager.namespace }}
+    version: 1.8.0
+    labels:
+      subChart: utils
+    chart: jetstack/cert-manager
+    set:
+      - name: installCRDs
+        value: true
+  - name: godaddy-webhook
+    chart: godaddy-webhook/godaddy-webhook
+    namespace: {{ .Values.utils.certManager.namespace }}
+    labels:
+      subChart: utils
+    values:
+      - ./utils/values/godaddy-webhook.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.certManager.namespace }}/cert-manager
+      - {{ .Values.utils.namespace }}/utils
+  - name: rabbitmq
+    namespace: {{ .Values.utils.rabbitmq.namespace }}
+    chart: bitnami/rabbitmq
+    version: 10.1.14
+    labels:
+      subChart: utils
+    values:
+      - ./Utils/values/rabbitmq.yaml.gotmpl
+  # region linkerd
+  - name: linkerd
+    chart: linkerd/linkerd2
+    namespace: {{ .Values.utils.linkerd.namespace }}
+    createNamespace: false
+    labels:
+      app: linkerd
+      subChart: utils
+    set:
+      - name: identityTrustAnchorsPEM
+        file: './utils/linkerdCerts/control-plane-ca.crt'
+      - name: policyValidator.caBundle
+        file: './utils/linkerdCerts/webhook-ca.crt'
+      - name: proxyInjector.caBundle
+        file: './utils/linkerdCerts/webhook-ca.crt'
+      - name: profileValidator.caBundle
+        file: './utils/linkerdCerts/webhook-ca.crt'
+    values:
+      - ./utils/values/linkerd.yaml.gotmpl
+    wait: true
+    needs:
+      - {{ .Values.utils.namespace }}/utils
+  - name: linkerd-viz
+    chart: linkerd/linkerd-viz
+    namespace: {{ .Values.utils.linkerdViz.namespace }}
+    createNamespace: false
+    labels:
+      app: linkerd
+      subChart: utils
+    values:
+      - ./utils/values/linkerd-viz.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.linkerd.namespace }}/linkerd
+    set:
+      - name: tap.caBundle
+        file: './Utils/linkerdCerts/webhook-ca.crt'
+      - name: tapInjector.caBundle
+        file: './Utils/linkerdCerts/webhook-ca.crt'
+  - name: linkerd-jaeger
+    chart: linkerd/linkerd-jaeger
+    namespace: {{ .Values.utils.linkerdJaeger.namespace }}
+    labels:
+      app: linkerd
+      subChart: utils
+    values:
+      - ./utils/values/linkerd-jaeger.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.linkerdViz.namespace }}/linkerd-viz
+    set:
+      - name: webhook.caBundle
+        file: './Utils/linkerdCerts/webhook-ca.crt'
+  # endregion
+  - name: utils
+    chart: ./Utils
+    namespace: {{ .Values.utils.namespace }}
+    labels:
+      subChart: utils
+    values:
+      - ./Utils/values.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.certManager.namespace }}/cert-manager

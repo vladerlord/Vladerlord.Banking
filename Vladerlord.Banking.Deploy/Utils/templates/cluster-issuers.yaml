@@ -1,0 +1,42 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    {{ if .Values.letsencrypt.isProduction }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    {{ else }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    {{ end }}
+    email: {{ .Values.letsencrypt.email }}
+    privateKeySecretRef:
+      {{ if .Values.letsencrypt.isProduction }}
+      name: letsencrypt-prod-tls
+      {{ else }}
+      name: letsencrypt-staging-tls
+      {{ end }}
+    solvers:
+      - selector:
+          dnsNames:
+            - "{{ .Values.letsencrypt.wildcardDomain }}"
+            - {{ .Values.letsencrypt.devDomain }}
+        dns01:
+          webhook:
+            config:
+              apiKeySecretRef:
+                name: godaddy-api-key
+                key: token
+              production: true
+              ttl: 600
+            groupName: {{ .Values.letsencrypt.acmeDomain }}
+            solverName: godaddy
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: self-signed-issuer
+  namespace: cert-manager
+spec:
+  selfSigned: {}

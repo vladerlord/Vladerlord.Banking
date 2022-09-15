@@ -1,0 +1,140 @@
+deployments:
+  - name: service-currency
+    image: vladerlord/vladerlord.banking.service.currency:latest
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5077
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5077
+      CURRENCY_DB_CONNECTION: "Host={{ .Values.databases.currency.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.currency.servicePort }};Username={{ .Values.secrets.databases.currency.user }};Password={{ .Values.secrets.databases.currency.password }};Database={{ .Values.databases.currency.database }}"
+  - name: service-identity
+    image: vladerlord/vladerlord.banking.service.identity:latest
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5074
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5074
+      IDENTITY_DB_CONNECTION: "Host={{ .Values.databases.identity.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.identity.servicePort }};Username={{ .Values.secrets.databases.identity.user }};Password={{ .Values.secrets.databases.identity.password }};Database={{ .Values.databases.identity.database }}"
+      SECURITY_JWT_SECRET: {{ .Values.secrets.banking.identity.jwtSecret }}
+      SECURITY_JWT_EXPIRATION_MINUTES: "320"
+      RABBITMQ_HOST: rabbitmq.{{ .Values.utils.rabbitmq.namespace }}.svc.cluster.local
+      RABBITMQ_USER: {{ .Values.secrets.utils.rabbitmq.username }}
+      RABBITMQ_PASSWORD: {{ .Values.secrets.utils.rabbitmq.password }}
+  - name: service-identitynotifier
+    image: vladerlord/vladerlord.banking.service.identitynotifier:latest
+    imagePullPolicy: Always
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      RABBITMQ_HOST: rabbitmq.{{ .Values.utils.rabbitmq.namespace }}.svc.cluster.local
+      RABBITMQ_USER: {{ .Values.secrets.utils.rabbitmq.username }}
+      RABBITMQ_PASSWORD: {{ .Values.secrets.utils.rabbitmq.password }}
+      SMTP_HOST: {{ .Values.secrets.banking.identityNotifier.smtpHost }}
+      SMTP_PORT: {{ .Values.secrets.banking.identityNotifier.smtpPort }}
+      SMTP_USERNAME: {{ .Values.secrets.banking.identityNotifier.smtpUsername }}
+      SMTP_PASSWORD: {{ .Values.secrets.banking.identityNotifier.smtpPassword }}
+      SMTP_FROM: {{ .Values.secrets.banking.identityNotifier.smtpFrom }}
+  - name: service-bankaccount
+    image: vladerlord/vladerlord.banking.service.bankaccount:latest
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5075
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5075
+      BANK_ACCOUNT_DB_CONNECTION: "Host={{ .Values.databases.bankAccount.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.bankAccount.servicePort }};Username={{ .Values.secrets.databases.bankAccount.user }};Password={{ .Values.secrets.databases.bankAccount.password }};Database={{ .Values.databases.bankAccount.database }}"
+      CURRENCY_GRPC: "http://service-currency-service:84"
+  - name: service-personaldata
+    image: vladerlord/vladerlord.banking.service.personaldata:latest
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5073
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5073
+      PERSONAL_DATA_DB_CONNECTION: "Host={{ .Values.databases.personalData.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.personalData.servicePort }};Username={{ .Values.secrets.databases.personalData.user }};Password={{ .Values.secrets.databases.personalData.password }};Database={{ .Values.databases.personalData.database }}"
+      IDENTITY_SCANS_VOLUME_FOLDER: "./Scans"
+      SECURITY_ENCRYPTION_KEY: "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM="
+  - name: gateway-root
+    image: vladerlord/vladerlord.banking.gateway.root:latest
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 5100
+    env:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5100
+      IDENTITY_GRPC: "http://service-identity-service:83"
+      PERSONAL_DATA_GRPC: "http://service-personaldata-service:81"
+      BANK_ACCOUNT_GRPC: "http://service-bankaccount-service:82"
+      CURRENCY_GRPC: "http://service-currency-service:84"
+      DOMAIN: "https://{{ .Values.banking.appDomain }}/app"
+
+services:
+  - app: service-currency
+    ports:
+      - port: 84
+        targetPort: 5077
+        name: http
+  - app: service-identity
+    ports:
+      - port: 83
+        targetPort: 5074
+        name: http
+  - app: service-bankaccount
+    ports:
+      - port: 82
+        targetPort: 5075
+        name: http
+  - app: service-personaldata
+    ports:
+      - port: 81
+        targetPort: 5073
+        name: http
+  - app: gateway-root
+    ports:
+      - port: 80
+        targetPort: 5100
+        name: http
+
+ingresses:
+  - name: app
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    tls:
+      - hosts:
+          - "*.{{ .Values.banking.domain }}"
+    enableTls: true
+    rules:
+      - host: {{ .Values.banking.appDomain }}
+        http:
+          paths:
+            - path: /app(/|$)(.*)
+              pathType: Prefix
+              backend:
+                service:
+                  name: gateway-root-service
+                  port:
+                    number: 80
+
+{{ if .Values.banking.ingress.useLocalCerts }}
+secrets:
+  - name: wildcard-vladerlord-fun-tls
+    namespace: {{ .Values.banking.namespace }}
+    type: kubernetes.io/tls
+    data:
+      - name: tls.crt
+        file: clusterCerts/tls.crt
+      - name: tls.key
+        file: clusterCerts/tls.key
+{{ else }}
+certificates:
+  - name: wildcard-vladerlord-fun
+    dnsNames:
+      - "{{ .Values.banking.wildcardDomain }}"
+    issuerRef:
+      name: letsencrypt-prod
+      kind: ClusterIssuer    
+{{ end }}

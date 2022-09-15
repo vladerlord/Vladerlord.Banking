@@ -1,0 +1,47 @@
+{{- range $deployment := .Values.deployments }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ $deployment.name }}-deployment"
+  labels:
+    app: "{{ $deployment.name }}-deployment"
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: "{{ $deployment.name }}-app"
+  template:
+    metadata:
+      name: "{{ $deployment.name }}-pod"
+      labels:
+        app: "{{ $deployment.name }}-app"
+    spec:
+      containers:
+        - name: "{{ $deployment.name }}-app"
+          image: {{ $deployment.image }}
+
+          {{ if $deployment.command }}
+          command: {{ $deployment.command }}
+          {{ end }}
+
+          {{ if $deployment.args }}
+          args: {{ $deployment.args }}
+          {{ end }}
+
+          {{ if $deployment.imagePullPolicy }}
+          imagePullPolicy: {{ $deployment.imagePullPolicy }}
+          {{ end }}
+
+          {{ range $port := $deployment.ports }}
+          ports:
+            - containerPort: {{ $port.containerPort }}
+          {{ end }}
+          env:
+            {{ if $deployment.env }}
+            {{- range $key, $value := $deployment.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{ end }}
+{{- end -}}

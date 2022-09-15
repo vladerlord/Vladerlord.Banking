@@ -1,0 +1,11 @@
+{{- range $issuer := .Values.issuers }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ $issuer.name }}
+  namespace: {{ $issuer.namespace }}
+spec:
+  ca:
+    secretName: {{ $issuer.ca.secretName }}
+{{- end }}

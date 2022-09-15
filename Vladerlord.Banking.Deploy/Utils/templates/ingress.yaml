@@ -1,0 +1,23 @@
+{{- range $ingress := .Values.ingresses }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $ingress.name }}
+  {{ if $ingress.namespace }}
+  namespace: {{ $ingress.namespace }}
+  {{ end }}
+
+  {{ if $ingress.annotations }}
+  annotations:
+    {{ toYaml $ingress.annotations | nindent 4 }}
+  {{ end }}
+spec:
+  ingressClassName: nginx
+  {{ if and $ingress.tls $ingress.enableTls }}
+  tls:
+    {{ toYaml $ingress.tls | nindent 4 }}
+  {{ end }}
+  rules:
+    {{ toYaml $ingress.rules | nindent 4 }}
+{{- end -}}

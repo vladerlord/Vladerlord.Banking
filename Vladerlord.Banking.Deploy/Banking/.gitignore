@@ -1,0 +1,2 @@
+clusterCerts/*
+!clusterCerts/.gitkeep

@@ -1,0 +1,48 @@
+healthCheckPath: "/kibana/app/kibana"
+podAnnotations:
+  linkerd.io/inject: enabled
+resources:
+  requests:
+    cpu: "200m"
+    memory: "400M"
+  limits:
+    cpu: "300m"
+    memory: "1Gi"
+ingress:
+  enabled: true
+  path: "/kibana"
+  pathtype: Prefix
+  hosts:
+    - {{ .Values.banking.devDomain }}
+  tls:
+    - hosts:
+        - "{{ .Values.banking.wildcardDomain }}"
+elasticsearchHosts: "https://elasticsearch-master.{{ .Values.dev.kibana.namespace }}.svc.cluster.local:9200"
+extraEnvs:
+  - name: 'ELASTICSEARCH_USERNAME'
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-credentials
+        key: username
+  - name: 'ELASTICSEARCH_PASSWORD'
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-credentials
+        key: password
+kibanaConfig:
+  kibana.yml: |
+    xpack.security.enabled: true
+    xpack.encryptedSavedObjects.encryptionKey: {{ .Values.secrets.dev.kibana.encryptionKey }}
+    #xpack.security.encryptionKey
+    server.basePath: "/kibana"
+    server.rewriteBasePath: true
+    server.publicBaseUrl: "https://{{ .Values.banking.devDomain }}/kibana"
+    elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+    elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+    elasticsearch.ssl.certificateAuthorities: [ "/usr/share/elasticsearch/config/certs/ca.crt" ]
+    elasticsearch.ssl.verificationMode: "certificate"
+
+secretMounts:
+  - name: elastic-certificates
+    secretName: elasticsearch-tls
+    path: /usr/share/elasticsearch/config/certs

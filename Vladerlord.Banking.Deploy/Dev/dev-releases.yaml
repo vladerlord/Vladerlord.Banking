@@ -1,0 +1,48 @@
+releases:
+  - name: oauth2-proxy
+    namespace: {{ .Values.dev.oauth2.namespace }}
+    chart: oauth2-proxy/oauth2-proxy
+    version: 6.2.1
+    values:
+      - ./Dev/values/oauth2-proxy.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.ingressNginx.namespace }}/ingress-nginx
+  - name: prometheus
+    namespace: {{ .Values.dev.prometheus.namespace }}
+    version: 15.10.0
+    chart: prometheus-community/prometheus
+    values:
+      - ./Dev/values/prometheus.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.ingressNginx.namespace }}/ingress-nginx
+  - name: elasticsearch
+    namespace: {{ .Values.dev.elasticsearch.namespace }}
+    version: 7.17.3
+    chart: elastic/elasticsearch
+    values:
+      - ./Dev/values/elasticsearch.yaml.gotmpl
+  - name: kibana
+    namespace: {{ .Values.dev.kibana.namespace }}
+    version: 7.17.3
+    chart: elastic/kibana
+    values:
+      - ./Dev/values/kibana.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.ingressNginx.namespace }}/ingress-nginx
+      - {{ .Values.dev.namespace }}/elasticsearch
+  - name: fluentd
+    namespace: {{ .Values.dev.fluentd.namespace }}
+    version: 5.0.0
+    chart: bitnami/fluentd
+    values:
+      - ./dev/values/fluentd.yaml.gotmpl
+    needs:
+      - {{ .Values.dev.namespace }}/elasticsearch
+  - name: dev
+    namespace: {{ .Values.dev.namespace }}
+    chart: ./dev
+    values:
+      - ./dev/values.yaml.gotmpl
+    needs:
+      - {{ .Values.utils.certManager.namespace }}/cert-manager
+      - {{ .Values.utils.ingressNginx.namespace }}/ingress-nginx

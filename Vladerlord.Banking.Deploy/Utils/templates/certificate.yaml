@@ -1,0 +1,55 @@
+{{- range $certificate := .Values.certificates }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $certificate.name }}
+  {{ if $certificate.namespace }}
+  namespace: {{ $certificate.namespace }}
+  {{ end }}
+spec:
+  {{ if $certificate.secretName }}
+  secretName: {{ $certificate.secretName | quote }}
+  {{ else }}
+  secretName: "{{ $certificate.name }}-tls"
+  {{ end }}
+
+  {{ if $certificate.duration }}
+  duration: {{ $certificate.duration }}
+  {{ end }}
+  {{ if $certificate.renewBefore }}
+  renewBefore: {{ $certificate.renewBefore }}
+  {{ end }}
+  {{ if $certificate.dnsNames }}
+  dnsNames:
+    {{- range $certificate.dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{ end }}
+  {{ if $certificate.isCA }}
+  isCA: {{ $certificate.isCA }}
+  {{ end }}
+  {{ if $certificate.commonName }}
+  commonName: {{ $certificate.commonName }}
+  {{ end }}
+  issuerRef:
+    name: {{ $certificate.issuerRef.name }}
+    kind: {{ $certificate.issuerRef.kind }}
+  {{ if $certificate.privateKey }}
+  privateKey:
+    {{ if $certificate.privateKey.algorithm }}
+    algorithm: {{ $certificate.privateKey.algorithm }}
+    {{ end }}
+    {{ if $certificate.privateKey.encoding }}
+    encoding: {{ $certificate.privateKey.encoding }}
+    {{ end }}
+  {{ end }}
+
+  {{ if $certificate.usages }}
+  usages:
+  {{ range $certificate.usages }}
+  - {{ . }}
+  {{ end }}
+  {{ end }}
+{{- end }}
+

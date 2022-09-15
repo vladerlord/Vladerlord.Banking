@@ -1,0 +1,21 @@
+config:
+  clientID: {{ .Values.secrets.dev.oauth2.clientID }}
+  clientSecret: {{ .Values.secrets.dev.oauth2.clientSecret }}
+  cookieSecret: {{ .Values.secrets.dev.oauth2.cookieSecret }}
+
+extraArgs:
+  whitelist-domain: .{{ .Values.banking.domain }}
+  cookie-domain: .{{ .Values.banking.domain }}
+  provider: github
+  github-user: {{ .Values.secrets.dev.oauth2.githubUser }}
+
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - {{ .Values.banking.devAuthDomain }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  tls:
+    - hosts:
+        - {{ .Values.banking.devAuthDomain }}

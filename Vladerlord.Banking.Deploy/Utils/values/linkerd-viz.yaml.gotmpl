@@ -1,0 +1,15 @@
+installNamespace: false
+
+tap:
+  externalSecret: true
+tapInjector:
+  externalSecret: true
+
+prometheus:
+  enabled: false
+
+jaegerUrl: jaeger.{{ .Values.utils.linkerdJaeger.namespace }}:16686
+prometheusUrl: http://prometheus-server.{{ .Values.dev.prometheus.namespace }}.svc.cluster.local:80
+
+dashboard:
+  enforcedHostRegexp: {{ .Values.banking.devDomain }}
