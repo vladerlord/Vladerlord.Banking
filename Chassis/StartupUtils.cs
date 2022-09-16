@@ -14,11 +14,7 @@ public static class StartupUtils
 {
     public static void ConfigureLogging(WebApplicationBuilder builder, LogEventLevel level = LogEventLevel.Information)
     {
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-        if (environment == null)
-            throw new Exception($"ASPNETCORE_ENVIRONMENT is not set");
-
+        var environment = EnvironmentUtils.GetRequiredEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         var config = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()

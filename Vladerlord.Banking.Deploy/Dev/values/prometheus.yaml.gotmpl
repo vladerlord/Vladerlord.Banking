@@ -285,6 +285,10 @@ serverFiles:
               names: [ 'default' ]
 
         relabel_configs:
+          # drop any linkerd containers as they have separate job
+          - source_labels: [ __meta_kubernetes_pod_container_name ]
+            action: drop
+            regex: ^.*linkerd.*$
           - source_labels: [ __meta_kubernetes_pod_annotation_prometheus_io_scrape ]
             action: keep
             regex: true

@@ -1,3 +1,5 @@
+using System.Diagnostics.Metrics;
+using Chassis;
 using Chassis.Gateway.ApiResponse;
 using Gateway.Root.Identity.Application;
 using Gateway.Root.Identity.Presentation.Models;
@@ -16,6 +18,9 @@ public class UserController : Controller
     private readonly IIdentityGrpcService _identityGrpcService;
     private readonly UserResetService _userResetService;
     private readonly UserService _userService;
+
+    private static readonly Counter<int> RegistrationCounter =
+        Metrics.Meter.CreateCounter<int>("banking_gateway_root_registration_counter");
 
     public UserController(IIdentityGrpcService identityGrpcService, UserResetService userResetService,
         UserService userService)
@@ -59,6 +64,9 @@ public class UserController : Controller
             Status = appResponse.GrpcStatus.Status.ToString(),
             User = appResponse.Content
         };
+
+        if (appResponse.GrpcStatus.Status == GrpcResponseStatus.Ok)
+            RegistrationCounter.Add(1, new []{new KeyValuePair<string, object?>("email", request.Email)});
 
         return new JsonResult(httpResponse)
         {

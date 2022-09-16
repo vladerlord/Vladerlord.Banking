@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Chassis;
 using MassTransit;
 using Serilog;
 using Service.IdentityNotifier.RazorTemplates;
@@ -10,6 +12,9 @@ public class UserCreatedEventSubscriber : IConsumer<UserCreatedEvent>
     private readonly IMailSender _mailSenderService;
     private readonly RazorTemplateRenderer _razorTemplateRenderer;
     private readonly ILogger _logger;
+
+    private static readonly ActivitySource Activity = new(Metrics.GetServiceName());
+    private const string ActivityName = "Send registration confirmation letter";
 
     public UserCreatedEventSubscriber(IMailSender mailSenderService, RazorTemplateRenderer razorTemplateRenderer,
         ILogger logger)
@@ -27,6 +32,9 @@ public class UserCreatedEventSubscriber : IConsumer<UserCreatedEvent>
         var body = await _razorTemplateRenderer.Render(viewModel);
 
         _logger.Information("Sending user registration confirmation letter for {Email}", message.Email);
+
+        using var activity = Activity.StartActivity(ActivityName, ActivityKind.Consumer, message.ActivityId);
+        activity?.SetTag("email", message.Email);
 
         await _mailSenderService.SendLetter(message.Email, "Registration confirmation", body);
     }

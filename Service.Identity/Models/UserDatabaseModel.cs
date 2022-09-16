@@ -35,13 +35,14 @@ public class UserDatabaseModel
         };
     }
 
-    public UserCreatedEvent ToCreatedEvent(string confirmationUrl)
+    public UserCreatedEvent ToCreatedEvent(string confirmationUrl, string? activityId)
     {
         return new UserCreatedEvent
         {
             Id = Id,
             Email = Email,
-            ConfirmationLink = confirmationUrl
+            ConfirmationLink = confirmationUrl,
+            ActivityId = activityId
         };
     }
 }

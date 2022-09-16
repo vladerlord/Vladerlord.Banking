@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Chassis;
 using MassTransit;
 using Npgsql;
 using Service.Identity.Abstractions;
@@ -18,6 +20,8 @@ public class IdentityGrpcService : IIdentityGrpcService
     private readonly TokenAuthService _tokenAuthService;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly HashService _hashService;
+
+    private static readonly ActivitySource Activity = new(Metrics.GetServiceName());
 
     public IdentityGrpcService(IUserRepository userRepository,
         IConfirmationLinkRepository confirmationLinkRepository,
@@ -77,7 +81,10 @@ public class IdentityGrpcService : IIdentityGrpcService
                 user.Id
             ));
 
-            await _publishEndpoint.Publish(user.ToCreatedEvent(request.RegisterConfirmationUrl));
+            using var activity = Activity.StartActivity(ActivityKind.Producer);
+            activity?.SetTag("email", request.Email);
+
+            await _publishEndpoint.Publish(user.ToCreatedEvent(request.RegisterConfirmationUrl, activity?.Id));
         }
         catch (PostgresException e)
         {
