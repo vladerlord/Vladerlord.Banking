@@ -76,33 +76,6 @@ public class PersonalDataGrpcServiceTest
     }
 
     [Test]
-    public async Task ApplyPersonalDataPersonalDataNotFound()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var personalDataCreate = new PersonalDataCreateGrpcModel { UserId = userId };
-        var request = new ApplyPersonalDataGrpcRequest
-        {
-            PersonalData = personalDataCreate,
-            KycScans = new List<KycScanCreateGrpcModel>()
-        };
-
-        _personalDataService.Setup(s => s.FindByUserId(userId))
-            .Returns(Task.FromResult<PersonalDataDatabaseModel?>(null));
-
-        // Act
-        var response = await _personalDataGrpcService.ApplyPersonalDataAsync(request);
-
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(response.GrpcResponse.Status, Is.EqualTo(GrpcResponseStatus.NotFound));
-            Assert.That(response.PersonalData, Is.Null);
-        });
-        _personalDataService.Verify(s => s.ApplyPersonalDataAsync(request), Times.Never);
-    }
-
-    [Test]
     public async Task ApplyPersonalDataAlreadyInPending()
     {
         // Arrange
