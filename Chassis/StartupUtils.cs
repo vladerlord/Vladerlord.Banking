@@ -7,6 +7,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Elasticsearch;
 
 namespace Chassis;
 
@@ -25,7 +26,7 @@ public static class StartupUtils
                     var (_, value) = p;
                     return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
                 }))
-            .WriteTo.Console();
+            .WriteTo.Console(new ElasticsearchJsonFormatter());
 
         config.MinimumLevel.Is(level);
 

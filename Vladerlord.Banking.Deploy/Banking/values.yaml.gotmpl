@@ -67,10 +67,11 @@ deployments:
       ASPNETCORE_URLS: http://+:5073
       PERSONAL_DATA_DB_CONNECTION: "Host={{ .Values.databases.personalData.service }}.{{ .Values.databases.namespace }}.svc.cluster.local:{{ .Values.databases.personalData.servicePort }};Username={{ .Values.secrets.databases.personalData.user }};Password={{ .Values.secrets.databases.personalData.password }};Database={{ .Values.databases.personalData.database }}"
       IDENTITY_SCANS_VOLUME_FOLDER: "./Scans"
-      SECURITY_ENCRYPTION_KEY: "MOn56M2W+dQ+RXxqD300GORRnRMOSK/nEJTpr2RzsmM="
     envFrom:
       - configMapRef:
           name: chassis-values
+      - secretRef:
+          name: banking-personal-data-security-key
   - name: gateway-root
     image: vladerlord/vladerlord.banking.gateway.root:latest
     imagePullPolicy: Always
@@ -174,6 +175,11 @@ secrets:
         value: {{ .Values.secrets.banking.identityNotifier.smtpPassword }}
       - name: SMTP_FROM
         value: {{ .Values.secrets.banking.identityNotifier.smtpFrom }}
+  - name: banking-personal-data-security-key
+    type: Opaque
+    data:
+      - name: SECURITY_ENCRYPTION_KEY
+        value: {{ .Values.secrets.banking.personalData.securityEncryptionKey }}
 
 {{ if not .Values.banking.ingress.useLocalCerts }}
 certificates:

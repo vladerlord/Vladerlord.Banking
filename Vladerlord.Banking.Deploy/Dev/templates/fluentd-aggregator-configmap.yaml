@@ -33,7 +33,7 @@ data:
     </match>
     
     # Send the logs to the standard output
-    <match kubernetes.var.log.containers.**app**.log>
+    <match kubernetes.var.log.containers.**.log>
       @type elasticsearch
       include_tag_key true
       hosts "#{ENV['ELASTICSEARCH_HOST']}"
