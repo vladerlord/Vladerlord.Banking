@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Formatting.Elasticsearch;
 using Service.IdentityNotifier;
 using Service.IdentityNotifier.Subscribers;
 
@@ -25,7 +26,7 @@ var builder = Host.CreateDefaultBuilder(args)
                     var (_, value) = p;
                     return value.ToString().Contains("swagger") || value.ToString().Contains("metrics");
                 }))
-            .WriteTo.Console();
+            .WriteTo.Console(new ElasticsearchJsonFormatter());
 
         if (isDevelopment)
             log.MinimumLevel.Debug();
