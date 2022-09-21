@@ -13,6 +13,3 @@
 
 docker
 deploy
-AuthGateway
-AuthGrpcService
-AuthShared
