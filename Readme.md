@@ -7,7 +7,7 @@ under one common solution for simplicity.
 ### Project structure:
 
 * Chassis - microservices chassis pattern for sharing codebase between all microservices
-* Chassis.Gateway - library for sharing codebase between grpc microservices
+* Chassis.Grpc - library for sharing codebase between grpc microservices
 * Chassis.Gateway - library for sharing codebase between gateways (http api)
 * Gateway.Root - http api for access to all grpc microservices
 * Service.BankAccount - bank account operations (create, take funds, add funds etc)
