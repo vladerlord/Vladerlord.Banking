@@ -30,6 +30,8 @@ under one common solution for simplicity.
 
 ### Installation
 
+Probably it won't run because of some hardcoded values like domain etc. This project is more like a showcase.
+
 1. Create Vladerlord.Banking.Deploy/environment/production/secrets.yaml from secrets.yaml.dist and values.yaml.dist
 2. Run `make createCerts` to create linkerd certificates
 3. Run `make createLinkerdNamespaces` to create linkerd namespaces (some parts of helmfile installation require linkerd
